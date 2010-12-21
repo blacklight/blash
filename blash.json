@@ -164,6 +164,8 @@
 				var out = '';
 				var exists = false;
 
+				arg = arg.replace ( /\/$/, '' );
+
 				if ( !arg || arg.length == 0 )
 				{
 					var re = new RegExp ( '^' + shell.path + '[^/]+$' );

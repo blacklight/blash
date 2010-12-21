@@ -148,26 +148,54 @@ function blash ()
 
 			this.prompt.focus();
 		} else if ( key == 9 ) {
-			var complete_type = '';
-
-			if ( this.prompt.value.match ( /\s/ ))
+			if ( this.prompt.value.match ( /\s(.*)$/ ))
 			{
-				complete_type = 'file';
+				var arg = RegExp.$1;
+				var path = arg;
+				var dirs = new Array();
+
+				for ( var i in this.json.directories )
+				{
+					if ( arg.match ( /^[^\/]/ ) )
+					{
+						path = this.path + '/' + arg;
+						path = path.replace ( /\/+/g, '/' );
+					}
+
+					var re = new RegExp ( '^' + path + '[^/]*$' );
+
+					if ( this.json.directories[i].path.match ( re ))
+					{
+						dirs.push ({
+							'name' : this.json.directories[i].path,
+							'type' : this.json.directories[i].type,
+						});
+					}
+				}
+
+				if ( dirs.length == 0 )
+				{
+					this.cmdOut.innerHTML = '<br/>Sorry, no matches for `' + this.prompt.value + "'";
+				} else if ( dirs.length == 1 ) {
+					this.prompt.value = this.prompt.value.replace ( arg, dirs[0].name + (( dirs[0].type == 'directory' ) ? '/' : '' ));
+				} else {
+					this.cmdOut.innerHTML = '';
+
+					for ( var i in dirs )
+					{
+						this.cmdOut.innerHTML += "<br/>\n" + dirs[i].name;
+					}
+				}
 			} else {
-				complete_type = 'cmd';
-			}
-
-			if ( complete_type == 'cmd' )
-			{
 				var cmds = new Array();
 
-				for ( var i in shell.json.commands )
+				for ( var i in this.json.commands )
 				{
 					var re = new RegExp ( '^' + this.prompt.value );
 
-					if ( shell.json.commands[i].name.match ( re ))
+					if ( this.json.commands[i].name.match ( re ))
 					{
-						cmds.push ( shell.json.commands[i].name );
+						cmds.push ( this.json.commands[i].name );
 					}
 				}
 
@@ -181,13 +209,13 @@ function blash ()
 
 					for ( var i in cmds )
 					{
-						this.cmdOut.innerHTML = "<br/>\n" + cmds[i];
+						this.cmdOut.innerHTML += "<br/>\n" + cmds[i];
 					}
 				}
 			}
-
-			this.prompt.focus();
 		}
+
+		this.prompt.focus();
 	}
 
 	this.unescapePrompt = function ( prompt, sequences )
