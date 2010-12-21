@@ -1,0 +1,16 @@
+<html>
+	<head>
+		<title>Blash - An AJAX interactive shell emulator for web browsing</title>
+		<script type="text/javascript" language="javascript" src="blash.js"></script>
+		<link rel="stylesheet" href="blash.css" type="text/css">
+	</head>
+
+	<body onload="shell = new blash()">
+		<div id="blashWindow" onmouseup="shell.prompt.focus()">
+			<span id="promptText" class="promptText"></span>
+			<input type="text" class="promptInput" name="blashPrompt" autocomplete="off" onkeyup="shell.getKey ( event )"/>
+			<span id="blashCmdOut" class="blashCmdOut"/></span>
+		</div>
+	</body>
+</html>
+

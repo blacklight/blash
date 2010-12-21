@@ -1,0 +1,324 @@
+{
+	"banner" : "blash version 0.1<br/>" +
+		"Copyright (C) 2010 BlackLight &lt;blacklight@autistici.org&gt;" +
+		"<br/>Licence GPLv3+: GNU GPL version 3 or later " +
+		"&lt;<a class=\"bannerLink\" href=\"http://gnu.org/licences/gpl.html\">" +
+		"http://gnu.org/licences/gpl.html</a>&gt;<br/><br/>" +
+		"This is free software; you are free to change and " +
+		"redistribuite it.<br/>There is NO WARRANTY, to the " +
+		"extent permitted by law.<br/>" +
+		"Type '<span class=\"brief\">man blash</span>' for help on usage and available commands<br/><br/>",
+
+	"user" : "blacklight",
+	"machine" : "localhost",
+	"shellName" : "blash",
+	"basepath" : "/",
+	"promptText" : "[#{800}%n#{888}@#{800}%m#{888} %W] $ ",
+	"promptSequences" : [
+		{
+			"sequence" : "%n",
+			"default_text" : "blacklight",
+			"text" : function ()  {
+				return shell.json.user;
+			},
+		},
+		{
+			"sequence" : "%m",
+			"default_text" : "localhost",
+			"text" : function ()  {
+				return shell.json.machine;
+			},
+		},
+		{
+			"sequence" : "%W",
+			"default_text" : "~",
+			"text" : function ()  {
+				return shell.json.basepath;
+			},
+		}
+	],
+
+	"directories" : [
+		{
+			"path" : "/",
+			"type" : "directory",
+		},
+		{
+			"path" : "/home",
+			"type" : "directory",
+		},
+		{
+			"path" : "/home/blacklight",
+			"type" : "directory",
+		},
+		{
+			"path" : "/etc",
+			"type" : "directory",
+		},
+		{
+			"path" : "/initrd",
+			"type" : "file",
+			"href" : "http://www.google.com",
+		},
+	],
+
+	"commands" : [
+		{
+			"name" : "pwd",
+
+			"info" : {
+				"syntax" : "pwd",
+				"brief" : "Print name of current/working directory",
+			},
+
+			"action" : function ( arg )  {
+				if ( arg )
+				{
+					if ( arg.length > 0 )
+					{
+						return this.name + ": Too many arguments<br/>";
+					} else {
+						return shell.path + '<br/>';
+					}
+				} else {
+					return shell.path + '<br/>';
+				}
+			},
+		},
+
+		{
+			"name" : "clear",
+
+			"info" : {
+				"syntax" : "clear",
+				"brief" : "Clear the terminal screen",
+			},
+
+			"action" : function ( arg )  {
+				var out = '';
+
+				shell.window.innerHTML =
+					'<span id="promptText" class="promptText"></span>' +
+					'<input type="text" class="promptInput" name="blashPrompt" autocomplete="off" onkeyup="shell.getKey ( event )"/>' +
+					'<span id="blashCmdOut" class="blashCmdOut"/></span>';
+
+				return out;
+			},
+		},
+
+		{
+			"name" : "man",
+
+			"info" : {
+				"syntax" : "man &lt;page&gt;",
+				"brief" : "Display the manual page for the command 'page'",
+			},
+
+			"action" : function ( arg )  {
+				var out = '';
+
+				if ( arg == undefined || arg.length == 0 )
+				{
+					return "What manual page do you want?<br/>\n";
+				}
+
+				var cmd = shell.json.commands;
+
+				if ( arg == 'blash' )
+				{
+					var commands = new Array();
+					out = '<span class="brief">Type "<span class="syntax">man &lt;command&gt;</span>" for a more detailed help on these commands</span><br/><br/>';
+
+					for ( var i=0; i < cmd.length; i++ )
+					{
+						commands.push ( cmd[i].info.syntax );
+					}
+
+					commands.sort();
+
+					for ( var i in commands )
+					{
+						out += '<span class="syntax">' + commands[i] + '</span><br/>';
+					}
+
+					return out;
+				}
+
+				var found = false;
+
+				for ( var i=0; i < cmd.length && !found; i++ )
+				{
+					if ( arg == cmd[i].name )
+					{
+						if ( cmd[i].info.syntax.length > 0 && cmd[i].info.brief.length > 0 )
+						{
+							found = true;
+
+							out =
+								'<span class="syntax">' + cmd[i].info.syntax + '</span><br/><br/>' +
+								'<span class="brief">' + cmd[i].info.brief + '</span><br/>';
+						}
+					}
+				}
+
+				if ( !found )
+				{
+					return "No manual entry for " + arg + "<br/>\n";
+				}
+
+				return out;
+			},
+		},
+		
+		{
+			"name" : "ls",
+
+			"info" : {
+				"syntax" : "ls [path]",
+				"brief" : "List directory contents",
+			},
+
+			"action" : function ( arg )
+			{
+				var dirs = new Array();
+				var out = '';
+				var exists = false;
+
+				if ( !arg || arg.length == 0 )
+				{
+					var re = new RegExp ( '^' + shell.path + '[^/]+$' );
+				} else if ( arg && arg.length > 0 ) {
+					var re = null;
+
+					if ( arg.match ( /^\// ))
+					{
+						re = new RegExp ( '^' + arg + '/[^/]+$' );
+					} else {
+						re = new RegExp ( '^' + shell.path +
+							(( shell.path == '/' ) ? '' : '/' ) +
+							arg + '/[^/]+$' );
+					}
+				}
+
+				for ( var i=0; i < shell.json.directories.length; i++ )
+				{
+					var dir = shell.json.directories[i];
+
+					if ( dir.path.match ( re ))
+					{
+						exists = true;
+						dir.path.match ( /\/([^\/]+)$/ );
+						dirs.push ({
+							"path" : RegExp.$1,
+							"type" : dir.type,
+							"href" : dir.href,
+						});
+					}
+				}
+
+				if ( dirs.length > 0 )
+				{
+					var ordered = false;
+
+					// Directories go first
+					while ( !ordered )
+					{
+						ordered = true;
+
+						for ( var i=0; i < dirs.length-1; i++ )
+						{
+							for ( var j=i+1; j < dirs.length; j++ )
+							{
+								if ( dirs[i].type == 'file' && dirs[j].type == 'directory' )
+								{
+									var tmp = dirs[i];
+									dirs[i] = dirs[j];
+									dirs[j] = tmp;
+									ordered = false;
+								}
+							}
+						}
+					}
+
+					ordered = false;
+
+					// Sort the names
+					while ( !ordered )
+					{
+						ordered = true;
+
+						for ( var i=0; i < dirs.length-1; i++ )
+						{
+							for ( var j=i+1; j < dirs.length; j++ )
+							{
+								if ( dirs[i].type == dirs[j].type && dirs[i].path > dirs[j].path )
+								{
+									var tmp = dirs[i];
+									dirs[i] = dirs[j];
+									dirs[j] = tmp;
+									ordered = false;
+								}
+							}
+						}
+					}
+					
+					for ( var i in dirs )
+					{
+						if ( dirs[i] )
+						{
+							if ( dirs[i].path.length > 0 )
+							{
+								if ( dirs[i].type == 'directory' )
+								{
+									out += '<span class="directory">' + dirs[i].path + '</span>/<br/>';
+								} else {
+									if ( dirs[i].href && dirs[i].href.length > 0 )
+									{
+										out += '<a href="' + dirs[i].href + '" class="file" target="_new">' + dirs[i].path + '</a>*<br/>';
+									} else {
+										out += '<span class="file">' + dirs[i].path + '</span><br/>';
+									}
+								}
+							}
+						}
+					}
+				}
+
+				if ( !exists )
+				{
+					var re = null;
+
+					if ( arg.match ( /^\// ))
+					{
+						re = new RegExp ( '^' + arg );
+					} else {
+						re = new RegExp ( '^' + shell.path +
+							(( shell.path == '/' ) ? '' : '/' ) + arg );
+					}
+
+					for ( var i=0; i < shell.json.directories.length; i++ )
+					{
+						var dir = shell.json.directories[i];
+
+						if ( dir.path.match ( re ))
+						{
+							exists = true;
+							break;
+						}
+					}
+
+					if ( !exists )
+					{
+						out = this.name + ": cannot access " + arg +
+							": No such file or directory<br/>";
+					} else {
+						out = '';
+					}
+				}
+
+				return out;
+			}
+		}
+	],
+}
+
