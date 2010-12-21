@@ -87,26 +87,6 @@
 		},
 
 		{
-			"name" : "clear",
-
-			"info" : {
-				"syntax" : "clear",
-				"brief" : "Clear the terminal screen",
-			},
-
-			"action" : function ( arg )  {
-				var out = '';
-
-				shell.window.innerHTML =
-					'<span id="promptText" class="promptText"></span>' +
-					'<input type="text" class="promptInput" name="blashPrompt" autocomplete="off" onkeyup="shell.getKey ( event )"/>' +
-					'<span id="blashCmdOut" class="blashCmdOut"/></span>';
-
-				return out;
-			},
-		},
-
-		{
 			"name" : "man",
 
 			"info" : {

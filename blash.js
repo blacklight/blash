@@ -147,6 +147,46 @@ function blash ()
 			}
 
 			this.prompt.focus();
+		} else if ( key == 9 ) {
+			var complete_type = '';
+
+			if ( this.prompt.value.match ( /\s/ ))
+			{
+				complete_type = 'file';
+			} else {
+				complete_type = 'cmd';
+			}
+
+			if ( complete_type == 'cmd' )
+			{
+				var cmds = new Array();
+
+				for ( var i in shell.json.commands )
+				{
+					var re = new RegExp ( '^' + this.prompt.value );
+
+					if ( shell.json.commands[i].name.match ( re ))
+					{
+						cmds.push ( shell.json.commands[i].name );
+					}
+				}
+
+				if ( cmds.length == 0 )
+				{
+					this.cmdOut.innerHTML = '<br/>Sorry, no matches for `' + this.prompt.value + "'";
+				} else if ( cmds.length == 1 ) {
+					this.prompt.value = cmds[0] + ' ';
+				} else {
+					this.cmdOut.innerHTML = '';
+
+					for ( var i in cmds )
+					{
+						this.cmdOut.innerHTML = "<br/>\n" + cmds[i];
+					}
+				}
+			}
+
+			this.prompt.focus();
 		}
 	}
 
