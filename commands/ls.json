@@ -1,0 +1,152 @@
+{
+	"name" : "ls",
+
+	"info" : {
+		"syntax" : "ls [path]",
+		"brief" : "List directory contents",
+	},
+
+	"action" : function ( arg )
+	{
+		var dirs = new Array();
+		var out = '';
+		var exists = false;
+
+		arg = arg.replace ( /\/$/, '' );
+
+		if ( !arg || arg.length == 0 )
+		{
+			var re = new RegExp ( '^' + shell.path + '[^/]+$' );
+		} else if ( arg && arg.length > 0 ) {
+			var re = null;
+
+			if ( arg.match ( /^\// ))
+			{
+				re = new RegExp ( '^' + arg + '/[^/]+$' );
+			} else {
+				re = new RegExp ( '^' + shell.path +
+						(( shell.path == '/' ) ? '' : '/' ) +
+						arg + '/[^/]+$' );
+			}
+		}
+
+		for ( var i=0; i < shell.json.directories.length; i++ )
+		{
+			var dir = shell.json.directories[i];
+
+			if ( dir.path.match ( re ))
+			{
+				exists = true;
+				dir.path.match ( /\/([^\/]+)$/ );
+				dirs.push ({
+						"path" : RegExp.$1,
+						"type" : dir.type,
+						"href" : dir.href,
+						});
+			}
+		}
+
+		if ( dirs.length > 0 )
+		{
+			var ordered = false;
+
+			// Directories go first
+			while ( !ordered )
+			{
+				ordered = true;
+
+				for ( var i=0; i < dirs.length-1; i++ )
+				{
+					for ( var j=i+1; j < dirs.length; j++ )
+					{
+						if ( dirs[i].type == 'file' && dirs[j].type == 'directory' )
+						{
+							var tmp = dirs[i];
+							dirs[i] = dirs[j];
+							dirs[j] = tmp;
+							ordered = false;
+						}
+					}
+				}
+			}
+
+			ordered = false;
+
+			// Sort the names
+			while ( !ordered )
+			{
+				ordered = true;
+
+				for ( var i=0; i < dirs.length-1; i++ )
+				{
+					for ( var j=i+1; j < dirs.length; j++ )
+					{
+						if ( dirs[i].type == dirs[j].type && dirs[i].path > dirs[j].path )
+						{
+							var tmp = dirs[i];
+							dirs[i] = dirs[j];
+							dirs[j] = tmp;
+							ordered = false;
+						}
+					}
+				}
+			}
+
+			for ( var i in dirs )
+			{
+				if ( dirs[i] )
+				{
+					if ( dirs[i].path.length > 0 )
+					{
+						if ( dirs[i].type == 'directory' )
+						{
+							out += '<span class="directory">' + dirs[i].path + '</span>/<br/>';
+						} else {
+							if ( dirs[i].href && dirs[i].href.length > 0 )
+							{
+								out += '<a href="' + dirs[i].href + '" class="file" target="_new">' + dirs[i].path + '</a>*<br/>';
+							} else {
+								out += '<span class="file">' + dirs[i].path + '</span><br/>';
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( !exists )
+		{
+			var re = null;
+
+			if ( arg.match ( /^\// ))
+			{
+				re = new RegExp ( '^' + arg );
+			} else {
+				re = new RegExp ( '^' + shell.path +
+						(( shell.path == '/' ) ? '' : '/' ) + arg );
+			}
+
+			for ( var i=0; i < shell.json.directories.length; i++ )
+			{
+				var dir = shell.json.directories[i];
+
+				if ( dir.path.match ( re ))
+				{
+					exists = true;
+					break;
+				}
+			}
+
+			if ( !exists )
+			{
+				out = this.name + ": cannot access " + arg +
+					": No such file or directory<br/>";
+			} else {
+				out = '';
+			}
+		}
+
+		return out;
+	}
+}
+

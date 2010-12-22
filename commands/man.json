@@ -1,0 +1,64 @@
+{
+	"name" : "man",
+
+	"info" : {
+		"syntax" : "man &lt;page&gt;",
+		"brief" : "Display the manual page for the command 'page'",
+	},
+
+	"action" : function ( arg )  {
+		var out = '';
+
+		if ( arg == undefined || arg.length == 0 )
+		{
+			return "What manual page do you want?<br/>\n";
+		}
+
+		var cmd = shell.json.commands;
+
+		if ( arg == 'blash' )
+		{
+			var commands = new Array();
+			out = '<span class="brief">Type "<span class="syntax">man &lt;command&gt;</span>" for a more detailed help on these commands</span><br/><br/>';
+
+			for ( var i=0; i < cmd.length; i++ )
+			{
+				commands.push ( cmd[i].info.syntax );
+			}
+
+			commands.sort();
+
+			for ( var i in commands )
+			{
+				out += '<span class="syntax">' + commands[i] + '</span><br/>';
+			}
+
+			return out;
+		}
+
+		var found = false;
+
+		for ( var i=0; i < cmd.length && !found; i++ )
+		{
+			if ( arg == cmd[i].name )
+			{
+				if ( cmd[i].info.syntax.length > 0 && cmd[i].info.brief.length > 0 )
+				{
+					found = true;
+
+					out =
+						'<span class="syntax">' + cmd[i].info.syntax + '</span><br/><br/>' +
+						'<span class="brief">' + cmd[i].info.brief + '</span><br/>';
+				}
+			}
+		}
+
+		if ( !found )
+		{
+			return "No manual entry for " + arg + "<br/>\n";
+		}
+
+		return out;
+	},
+}
+

@@ -9,6 +9,9 @@ function blash ()
 	/** Shell window object */
 	this.window = document.getElementById ( "blashWindow" );
 
+	/** Array containing the codes of the shell commands */
+	this.commands = new Array();
+
 	/** Escape sequences to be parsed in the prompt text */
 	this.promptSequences = new Array();
 
@@ -34,6 +37,25 @@ function blash ()
 	this.__open_spans = 0;
 	/**************************************/
 
+	this.loadCommand = function ( cmd )
+	{
+		var cmd_file = window.location.href;
+		cmd_file = cmd_file.replace ( /\/([a-zA-Z\.]+)$/, '/commands/' + cmd  + ".json" );
+
+		var http = new XMLHttpRequest();
+		http.open ( "GET", cmd_file, true );
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				shell.commands.push ( eval ( '(' + http.responseText + ')' ));
+			}
+		}
+
+		http.send ( null );
+	}
+
 	this.prompt.focus();
 
 	var json_config = window.location.href;
@@ -58,11 +80,16 @@ function blash ()
 				banner.innerHTML = shell.json.banner;
 				shell.window.insertBefore ( banner, shell.promptText );
 			}
+
+			for ( var i in shell.json.commands )
+			{
+				shell.loadCommand ( shell.json.commands[i] );
+			}
 		}
 	}
 
 	http.send ( null );
-	
+
 	this.getKey = function ( e )
 	{
 		var evt = ( window.event ) ? window.event : e;
@@ -79,12 +106,12 @@ function blash ()
 				this.history.push ( this.prompt.value );
 				this.history_index = -1;
 
-				for ( i=0; i < this.json.commands.length && !cmd_found; i++ )
+				for ( i=0; i < this.commands.length && !cmd_found; i++ )
 				{
-					if ( this.json.commands[i].name == cmd )
+					if ( this.commands[i].name == cmd )
 					{
 						cmd_found = true;
-						var out = this.json.commands[i].action ( arg );
+						var out = this.commands[i].action ( arg );
 
 						if ( out.length > 0 )
 						{
@@ -189,13 +216,13 @@ function blash ()
 			} else {
 				var cmds = new Array();
 
-				for ( var i in this.json.commands )
+				for ( var i in this.commands )
 				{
 					var re = new RegExp ( '^' + this.prompt.value );
 
-					if ( this.json.commands[i].name.match ( re ))
+					if ( this.commands[i].name.match ( re ))
 					{
-						cmds.push ( this.json.commands[i].name );
+						cmds.push ( this.commands[i].name );
 					}
 				}
 

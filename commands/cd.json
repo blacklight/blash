@@ -1,0 +1,50 @@
+{
+	"name" : "cd",
+
+	"info" :  {
+		"syntax" : "cd &lt;directory&gt;",
+		"brief" : "Change the current directory to the specified one",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "Parameter expected<br/>\n";
+		}
+
+		arg = arg.replace ( /\/$/, '' );
+
+		if ( arg.match ( /^[^\/]/ ))
+		{
+			arg = this.path + '/' + arg;
+			arg = arg.replace ( /\/+/, '/' );
+		}
+
+		var found = false;
+
+		for ( var i=0; i < shell.json.directories.length && !found; i++ )
+		{
+			if ( shell.json.directories[i].path == arg )
+			{
+				found = true;
+
+				if ( shell.json.directories[i].type != 'directory' )
+				{
+					return "cd: not a directory: " + arg + "<br/>\n";
+				}
+			}
+		}
+
+		if ( !found )
+		{
+			return "cd: no such file or directory: " + arg + "<br/>\n";
+		}
+
+		shell.path = arg;
+		return out;
+	},
+}
+
