@@ -14,7 +14,7 @@
 			return "What manual page do you want?<br/>\n";
 		}
 
-		var cmd = shell.json.commands;
+		var cmd = shell.commands;
 
 		if ( arg == 'blash' )
 		{
