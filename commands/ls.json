@@ -114,6 +114,17 @@
 
 		if ( !exists )
 		{
+			for ( var i=0; i < shell.json.directories.length; i++ )
+			{
+				var dir = shell.json.directories[i];
+				arg = arg.replace ( /\/+$/, '' );
+
+				if ( dir.path.match ( arg ))
+				{
+					return '';
+				}
+			}
+
 			var re = null;
 
 			if ( arg.match ( /^\// ))

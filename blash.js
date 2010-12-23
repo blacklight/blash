@@ -35,6 +35,9 @@ function blash ()
 
 	/** Counter of the open <span> tags when replacing the colours in the command prompt */
 	this.__open_spans = 0;
+
+	/** Check if this is the first command given in this session (for fixing <br/> stuff) */
+	this.__first_cmd = true;
 	/**************************************/
 
 	this.loadCommand = function ( cmd )
@@ -133,7 +136,22 @@ function blash ()
 
 				this.window.removeChild ( this.prompt );
 				this.window.removeChild ( this.cmdOut );
-				this.window.innerHTML += value + '<br/>' + out + text;
+
+				if ( this.__first_cmd )
+				{
+					this.window.innerHTML += value + '<br/>' + out + text;
+					this.__first_cmd = false;
+				} else {
+					if ( out )
+					{
+						if ( out.match ( /^\s*<br.?>\s*/ ))
+						{
+							out = '';
+						}
+					}
+
+					this.window.innerHTML += value + '<br/>' + out + text;
+				}
 
 				this.prompt = document.createElement ( 'input' );
 				this.prompt.setAttribute ( 'name', 'blashPrompt' );

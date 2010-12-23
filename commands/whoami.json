@@ -1,0 +1,21 @@
+{
+	"name" : "whoami",
+
+	"info" : {
+		"syntax" : "whoami",
+		"brief" : "Print effective userid",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+		
+		if ( arg )
+		{
+			return "whoami: extra operand `" + arg + "'<br/>\n";
+		}
+
+		return shell.json.user + "<br/>\n";
+	},
+}
+

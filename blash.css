@@ -13,6 +13,7 @@ input.promptInput
 	color : #888;
 	font-family : Terminus, courier, monospace, fixed;
 	font-size : 13px;
+	width : 400px;
 }
 
 div#blashWindow
@@ -35,9 +36,14 @@ span.directory
 	color : #2553ee;
 }
 
-.file
+a
 {
-	color : #4f4;
+	color : green;
+}
+
+a:visited
+{
+	color : green;
 }
 
 span.syntax

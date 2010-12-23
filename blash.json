@@ -9,7 +9,7 @@
 		"extent permitted by law.<br/>" +
 		"Type '<span class=\"brief\">man blash</span>' for help on usage and available commands<br/><br/>",
 
-	"user" : "blacklight",
+	"user" : "guest",
 	"machine" : "localhost",
 	"shellName" : "blash",
 	"basepath" : "/",
@@ -54,6 +54,7 @@
 		{
 			"path" : "/home/blacklight/mbox",
 			"type" : "file",
+			"content" : "No new mail",
 		},
 		{
 			"path" : "/etc",
@@ -69,9 +70,11 @@
 	"commands" : [
 		"cat",
 		"cd",
+		"find",
 		"ls",
 		"man",
 		"pwd",
+		"whoami",
 	],
 }
 
