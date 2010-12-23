@@ -12,22 +12,19 @@
 		var out = '';
 		var exists = false;
 
-		arg = arg.replace ( /\/$/, '' );
-
 		if ( !arg || arg.length == 0 )
 		{
-			var re = new RegExp ( '^' + shell.path + '[^/]+$' );
-		} else if ( arg && arg.length > 0 ) {
 			var re = null;
 
-			if ( arg.match ( /^\// ))
+			if ( shell.path == '/' )
 			{
-				re = new RegExp ( '^' + arg + '/[^/]+$' );
+				re = new RegExp ( '^' + shell.path + '[^/]+$' );
 			} else {
-				re = new RegExp ( '^' + shell.path +
-						(( shell.path == '/' ) ? '' : '/' ) +
-						arg + '/[^/]+$' );
+				re = new RegExp ( '^' + shell.path + '/?[^/]+$' );
 			}
+		} else if ( arg && arg.length > 0 ) {
+			arg = shell.expandPath ( arg );
+			var re = new RegExp ( '^' + arg + '/[^/]+$' );
 		}
 
 		for ( var i=0; i < shell.json.directories.length; i++ )
@@ -38,11 +35,12 @@
 			{
 				exists = true;
 				dir.path.match ( /\/([^\/]+)$/ );
+
 				dirs.push ({
-						"path" : RegExp.$1,
-						"type" : dir.type,
-						"href" : dir.href,
-						});
+					"path" : RegExp.$1,
+					"type" : dir.type,
+					"href" : dir.href,
+				});
 			}
 		}
 
@@ -106,7 +104,7 @@
 							{
 								out += '<a href="' + dirs[i].href + '" class="file" target="_new">' + dirs[i].path + '</a>*<br/>';
 							} else {
-								out += '<span class="file">' + dirs[i].path + '</span><br/>';
+								out += dirs[i].path + '<br/>';
 							}
 						}
 					}

@@ -33,7 +33,7 @@
 			"sequence" : "%W",
 			"default_text" : "~",
 			"text" : function ()  {
-				return shell.json.basepath;
+				return shell.path;
 			},
 		}
 	],
@@ -50,6 +50,10 @@
 		{
 			"path" : "/home/blacklight",
 			"type" : "directory",
+		},
+		{
+			"path" : "/home/blacklight/mbox",
+			"type" : "file",
 		},
 		{
 			"path" : "/etc",

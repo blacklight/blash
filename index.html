@@ -8,7 +8,7 @@
 	<body onload="shell = new blash()">
 		<div id="blashWindow" onmouseup="shell.prompt.focus()">
 			<span id="promptText" class="promptText"></span>
-			<input type="text" class="promptInput" name="blashPrompt" autocomplete="off" onkeyup="shell.getKey ( event )"/>
+			<input type="text" class="promptInput" name="blashPrompt" autocomplete="off" onkeydown="shell.getKey ( event )" onkeyup="this.focus()"/>
 			<span id="blashCmdOut" class="blashCmdOut"/></span>
 		</div>
 	</body>

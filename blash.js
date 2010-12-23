@@ -128,16 +128,20 @@ function blash ()
 				var value = this.prompt.value;
 				var out = this.cmdOut.innerHTML;
 
+				var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
+				text = shell.unescapePrompt ( text, shell.json.promptSequences );
+
 				this.window.removeChild ( this.prompt );
 				this.window.removeChild ( this.cmdOut );
-				this.window.innerHTML += value + '<br/>' + out + this.promptText.innerHTML;
+				this.window.innerHTML += value + '<br/>' + out + text;
 
 				this.prompt = document.createElement ( 'input' );
 				this.prompt.setAttribute ( 'name', 'blashPrompt' );
 				this.prompt.setAttribute ( 'type', 'text' );
 				this.prompt.setAttribute ( 'class', 'promptInput' );
 				this.prompt.setAttribute ( 'autocomplete', 'off' );
-				this.prompt.setAttribute ( 'onkeyup', 'shell.getKey ( event )' );
+				this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+				this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
 
 				this.cmdOut = document.createElement ( 'div' );
 				this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
@@ -175,6 +179,8 @@ function blash ()
 
 			this.prompt.focus();
 		} else if ( key == 9 ) {
+			this.prompt.focus();
+
 			if ( this.prompt.value.match ( /\s(.*)$/ ))
 			{
 				var arg = RegExp.$1;
@@ -240,6 +246,8 @@ function blash ()
 					}
 				}
 			}
+
+			this.prompt.focus();
 		}
 
 		this.prompt.focus();
@@ -276,6 +284,7 @@ function blash ()
 	this.unescapePromptSequence = function ( prompt, sequence, text, default_text )
 	{
 		var re = new RegExp ( "([^\]?)" + sequence, "g" );
+		prompt.replace ( /%W/g, this.path );
 
 		if ( prompt.match ( re ))
 		{
@@ -283,6 +292,18 @@ function blash ()
 		}
 
 		return prompt;
+	}
+
+	this.expandPath = function ( arg )
+	{
+		if ( arg.match ( /^[^\/]/ ))
+		{
+			arg = this.path + '/' + arg;
+		}
+
+		arg = arg.replace ( /\/*$/, '' );
+		arg = arg.replace ( /\/+/, '/' );
+		return arg;
 	}
 }
 
