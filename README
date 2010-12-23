@@ -1,0 +1,77 @@
+blash - BlackLight's shell
+An AJAX CMS for browsing your web site through a shell-oriented interface
+by BlackLight, <blacklight@autistici.org>, http://0x00.ath.cx
+
+Q.: What is blash?
+A.: blash is a tiny CMS developed in AJAX that allows you to browse your website
+through a shell-oriented interface. The way to use it is quite simple and
+inspired from software like bash and zsh, you can see an example running at the
+address http://0x00.ath.cx/blash/index.html.
+
+Q.: How can a web site be represented like a filesystem browsable from a terminal?
+A.: A directory is fundamentally a `container' of logically correlated items (for
+example, a directory could be blog/, or forum/, or news/, and so on). A page in your
+web site is represented as file inside of its directory (for example, the 4th post
+in a blog may be represented as the file `4' in directory `blog/'). Then you can
+simply browse the web site in the following way:
+
+- ls for viewing the content of a certain directory
+- cd for changing the current directory
+- cat for opening a certain file
+
+A `file' can be a container of static stuff (in this case `cat' simply prints
+its content on the pseudo-terminal) or the link to another page (in this case
+`cat' opens that link in a new window or tab, be sure you allow your web site to
+open popup windows). The pages having static content printed to the
+pseudo-terminal are represented in normal font, the files that links to an
+external content is instead represented as an `executable' file (by default, in
+colour green).
+
+Q.: Which browsers are compatible with blash?
+A.: So far blash has been successfully tested with the following browsers:
+
+- Mozilla Firefox ( >= 3.5)
+- Opera ( >= 11.0 )
+- Google Chrome (despite the auto-completion feature is a bit buggy)
+- Konqueror >= 4.x
+- Flock
+- uzbl
+- surf
+- vimprobable
+- jumanji
+
+However, any browser with a decent JavaScript engine should give no problem with
+blash. Internet Explorer is currently NOT working with blash, at least any
+release <= 8. I'm sorry, choose a decent browser.
+
+Q.: How do I add the contents for my web site in blash?
+A.: Open the file blash.json. This JSON file contains the preferences for your
+shell (banner, prompt style, default user, escape sequences recognized in the
+prompt string...), the commands to be used, and the array "directories". This
+array is the container of your web site data. Each element can have the
+following fields:
+
+- path (MANDATORY), the full absolute path that identifies that resource
+- type (MANDATORY), the resource type (directory or file)
+- href (for files only), if the file is a link to an external page, the link it
+should point to
+- content (for files only), if the file has static content that should be
+printed in the pseudo-terminal window, this field contains its content
+
+Q.: Can I add more commands?
+A.: Sure you can. Take a look at directory `commands' for seeing the definition
+of default commands. Each commands is represented as a JSON file containing the
+following fields:
+
+- "name", name of the command
+- "info", array containing the fields "syntax" and "brief", used for showing the
+syntax of the command when you type `man blash' and the full description when
+you type `man <command>'
+- "action": a function taking as parameter the argument passed to the command
+and executing the command itself. This function returns the string that should
+be printed by the command to the terminal. You can also access and/or modify
+blash's variables and settings accessing them through the object shell.* take a
+look at the file `blash.js' for a brief description of the fields of this object
+or to the sample commands in `commands/' directory for seeing how to access
+them.
+

@@ -1,3 +1,13 @@
+/*****************************************************************
+ *                                                               *
+ * blash - An AJAX CMS for browsing your web site like a shell   *
+ *                                                               *
+ * by BlackLight <blacklight@autistici.org>, (C) 2010            *
+ * Web: http://0x00.ath.cx                                       *
+ * Released under GPL licence v.3                                *
+ *                                                               *
+ *****************************************************************/
+
 var shell = null;
 
 function blash ()

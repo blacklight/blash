@@ -1,9 +1,16 @@
+/**
+ * Sample configuration and contents
+ */
+
 {
 	"banner" : "blash version 0.1<br/>" +
 		"Copyright (C) 2010 BlackLight &lt;blacklight@autistici.org&gt;" +
 		"<br/>Licence GPLv3+: GNU GPL version 3 or later " +
-		"&lt;<a class=\"bannerLink\" href=\"http://gnu.org/licences/gpl.html\">" +
-		"http://gnu.org/licences/gpl.html</a>&gt;<br/><br/>" +
+		"&lt;<a class=\"bannerLink\" href=\"http://gnu.org/licences/gpl.html\" target=\"_new\">" +
+		"http://gnu.org/licences/gpl.html</a>&gt;<br/>" +
+		"Source code available at <a class=\"bannerLink\" target=\"_new\" " +
+		"href=\"https://github.com/BlackLight/blash\">" +
+		"https://github.com/BlackLight/blash</a><br/><br/>" +
 		"This is free software; you are free to change and " +
 		"redistribuite it.<br/>There is NO WARRANTY, to the " +
 		"extent permitted by law.<br/>" +
@@ -70,6 +77,7 @@
 	"commands" : [
 		"cat",
 		"cd",
+		"eval",
 		"find",
 		"ls",
 		"man",

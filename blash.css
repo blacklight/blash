@@ -14,23 +14,17 @@ input.promptInput
 	color : #888;
 	font-family : Terminus, courier, monospace, fixed;
 	font-size : 13px;
-	width : 400px;
+	width : 500px;
 }
 
 div#blashWindow
 {
-	width : 600px;
+	width : 800px;
 	height : 400px;
 	margin : auto;
 	padding : 10px;
 	border : 1px solid #888;
 	overflow : auto;
-	tabindex : -1;
-}
-
-a.bannerLink
-{
-	color : white;
 	tabindex : -1;
 }
 
