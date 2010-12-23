@@ -206,10 +206,7 @@ function blash ()
 					}
 				}
 
-				if ( dirs.length == 0 )
-				{
-					this.cmdOut.innerHTML = '<br/>Sorry, no matches for `' + this.prompt.value + "'";
-				} else if ( dirs.length == 1 ) {
+				if ( dirs.length == 1 ) {
 					this.prompt.value = this.prompt.value.replace ( arg, dirs[0].name + (( dirs[0].type == 'directory' ) ? '/' : '' ));
 				} else {
 					this.cmdOut.innerHTML = '';
@@ -301,8 +298,35 @@ function blash ()
 			arg = this.path + '/' + arg;
 		}
 
-		arg = arg.replace ( /\/*$/, '' );
 		arg = arg.replace ( /\/+/, '/' );
+
+		if ( arg != '/' )
+		{
+			arg = arg.replace ( /\/*$/, '' );
+		}
+
+		while ( arg.match ( /^(.+?\/?\.\.)/ ))
+		{
+			var part = RegExp.$1;
+
+			if ( arg.match ( /^(.+?)\/?\.\./ ))
+			{
+				if ( RegExp.$1 == '/' )
+				{
+					arg = arg.replace ( part, '/' );
+				} else {
+					part.match ( /^(.*)\/[^\/]*\/\.\..*$/ );
+					var sup = RegExp.$1;
+					arg = arg.replace ( part, sup );
+
+					if ( arg.length == 0 )
+					{
+						arg = '/';
+					}
+				}
+			}
+		}
+
 		return arg;
 	}
 }

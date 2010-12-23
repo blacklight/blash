@@ -1,0 +1,45 @@
+{
+	"name" : "cat",
+
+	"info" : {
+		"syntax" : "cat &lt;file&gt;",
+		"brief" : "Show the content of a page",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "Argument required<br/>\n";
+		}
+
+		var found = false;
+		var dir = shell.json.directories;
+		arg = shell.expandPath ( arg );
+
+		for ( var i=0; i < dir.length && !found; i++ )
+		{
+			if ( dir[i].path == arg )
+			{
+				found = true;
+
+				if ( dir[i].type == 'directory' )
+				{
+					return "cat: " + dir[i].path + ": Is a directory<br/>\n";
+				} else {
+					if ( dir[i].href )
+					{
+						window.open ( dir[i].href );
+					} else if ( dir[i].content ) {
+						return dir[i].content + "<br/>\n";
+					}
+				}
+			}
+		}
+
+		return out;
+	},
+}
+

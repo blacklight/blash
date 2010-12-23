@@ -15,15 +15,8 @@
 			return "Parameter expected<br/>\n";
 		}
 
-		arg = arg.replace ( /\/$/, '' );
-
-		if ( arg.match ( /^[^\/]/ ))
-		{
-			arg = this.path + '/' + arg;
-			arg = arg.replace ( /\/+/, '/' );
-		}
-
 		var found = false;
+		arg = shell.expandPath ( arg );
 
 		for ( var i=0; i < shell.json.directories.length && !found; i++ )
 		{
