@@ -160,6 +160,7 @@ function blash ()
 				this.prompt.setAttribute ( 'autocomplete', 'off' );
 				this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
 				this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+				this.prompt.setAttribute ( 'onblur', 'return false' );
 
 				this.cmdOut = document.createElement ( 'div' );
 				this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
@@ -263,6 +264,14 @@ function blash ()
 			}
 
 			this.prompt.focus();
+			setTimeout ( function()  { shell.prompt.focus(); }, 1 );
+			
+			if ( this.prompt.setSelectionRange )
+			{
+				this.prompt.setSelectionRange ( this.prompt.value.length, this.prompt.value.length );
+			}
+
+			return false;
 		}
 
 		this.prompt.focus();

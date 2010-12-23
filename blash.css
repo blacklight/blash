@@ -4,6 +4,7 @@ body
 	color : #888;
 	font-family : Terminus, courier, monospace, fixed;
 	font-size : 13px;
+	tabindex : -1;
 }
 
 input.promptInput
@@ -24,11 +25,13 @@ div#blashWindow
 	padding : 10px;
 	border : 1px solid #888;
 	overflow : auto;
+	tabindex : -1;
 }
 
 a.bannerLink
 {
 	color : white;
+	tabindex : -1;
 }
 
 span.directory
@@ -39,11 +42,13 @@ span.directory
 a
 {
 	color : green;
+	tabindex : -1;
 }
 
 a:visited
 {
 	color : green;
+	tabindex : -1;
 }
 
 span.syntax
