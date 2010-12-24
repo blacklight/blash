@@ -20,7 +20,7 @@
 			arg = RegExp.$1;
 		}
 
-		var re = new RegExp ( arg );
+		var re = new RegExp ( arg, "i" );
 
 		for ( var i in shell.json.directories )
 		{

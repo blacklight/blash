@@ -137,50 +137,50 @@ function blash ()
 				{
 					this.cmdOut.innerHTML = this.json.shellName + ": command not found: " + cmd + '<br/>';
 				}
+			}
 
-				var value = this.prompt.value;
-				var out = this.cmdOut.innerHTML;
+			var value = this.prompt.value;
+			var out = this.cmdOut.innerHTML;
 
-				var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
-				text = shell.unescapePrompt ( text, shell.json.promptSequences );
+			var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
+			text = shell.unescapePrompt ( text, shell.json.promptSequences );
 
-				this.window.removeChild ( this.prompt );
-				this.window.removeChild ( this.cmdOut );
+			this.window.removeChild ( this.prompt );
+			this.window.removeChild ( this.cmdOut );
 
-				if ( this.__first_cmd )
+			if ( this.__first_cmd && this.prompt.value.length > 0 )
+			{
+				this.window.innerHTML += value + '<br/>' + out + text;
+				this.__first_cmd = false;
+			} else {
+				if ( out )
 				{
-					this.window.innerHTML += value + '<br/>' + out + text;
-					this.__first_cmd = false;
-				} else {
-					if ( out )
+					if ( out.match ( /^\s*<br.?>\s*/ ))
 					{
-						if ( out.match ( /^\s*<br.?>\s*/ ))
-						{
-							out = '';
-						}
+						out = '';
 					}
-
-					this.window.innerHTML += value + '<br/>' + out + text;
 				}
 
-				this.prompt = document.createElement ( 'input' );
-				this.prompt.setAttribute ( 'name', 'blashPrompt' );
-				this.prompt.setAttribute ( 'type', 'text' );
-				this.prompt.setAttribute ( 'class', 'promptInput' );
-				this.prompt.setAttribute ( 'autocomplete', 'off' );
-				this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
-				this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
-				this.prompt.setAttribute ( 'onblur', 'return false' );
-
-				this.cmdOut = document.createElement ( 'div' );
-				this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
-				this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
-				this.cmdOut.innerHTML = '<br/>';
-
-				this.window.appendChild ( this.prompt );
-				this.window.appendChild ( this.cmdOut );
-				this.prompt.focus();
+				this.window.innerHTML += value + '<br/>' + out + text;
 			}
+
+			this.prompt = document.createElement ( 'input' );
+			this.prompt.setAttribute ( 'name', 'blashPrompt' );
+			this.prompt.setAttribute ( 'type', 'text' );
+			this.prompt.setAttribute ( 'class', 'promptInput' );
+			this.prompt.setAttribute ( 'autocomplete', 'off' );
+			this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+			this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+			this.prompt.setAttribute ( 'onblur', 'return false' );
+
+			this.cmdOut = document.createElement ( 'div' );
+			this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
+			this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
+			this.cmdOut.innerHTML = '<br/>';
+
+			this.window.appendChild ( this.prompt );
+			this.window.appendChild ( this.cmdOut );
+			this.prompt.focus();
 		} else if ( key == 38 || key == 40 ) {
 			if ( key == 38 )
 			{
@@ -242,7 +242,66 @@ function blash ()
 
 					for ( var i in dirs )
 					{
-						this.cmdOut.innerHTML += "<br/>\n" + dirs[i].name;
+						if ( i > 0 )
+						{
+							this.cmdOut.innerHTML += "<br/>\n";
+						}
+
+						this.cmdOut.innerHTML += dirs[i].name;
+					}
+
+					if ( dirs.length > 1 )
+					{
+						// Get the longest sequence in common
+						var sequences = new Array();
+						var min_len = 0;
+
+						for ( var i in dirs )
+						{
+							for ( var j in dirs )
+							{
+								if ( i != j )
+								{
+									if ( dirs[i].name.length != dirs[j].name.length )
+									{
+										min_len = ( dirs[i].name.length < dirs[j].name.length ) ? dirs[i].name.length : dirs[j].name.length;
+									} else {
+										min_len = dirs[i].name.length;
+									}
+
+									var k = 0;
+
+									for ( k = min_len-1; k >= 0; k-- )
+									{
+										if ( dirs[i].name.charAt ( k ) != dirs[j].name.charAt ( k ))
+										{
+											break;
+										}
+									}
+
+									var seq = '';
+
+									for ( var l=0; l < k; l++ )
+									{
+										seq += dirs[i].name.charAt ( l );
+									}
+
+									sequences.push ( seq );
+								}
+							}
+						}
+
+						var seq = sequences[0];
+
+						for ( var i in sequences )
+						{
+							if ( sequences[i].length < seq )
+							{
+								seq = sequences[i];
+							}
+						}
+
+						this.prompt.value = this.prompt.value.replace ( arg, seq + (( dirs[0].type == 'directory' ) ? '/' : '' ));
 					}
 				}
 			} else {

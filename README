@@ -75,3 +75,6 @@ look at the file `blash.js' for a brief description of the fields of this object
 or to the sample commands in `commands/' directory for seeing how to access
 them.
 
+After creating your JSON file with the new command, don't forget to add the name
+of the command to the array `commands' in blash.json so that the CMS sees it.
+
