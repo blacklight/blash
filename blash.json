@@ -188,6 +188,7 @@
 	"commands" : [
 		"cat",
 		"cd",
+		"clear",
 		"eval",
 		"find",
 		"ls",
