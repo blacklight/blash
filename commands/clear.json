@@ -9,30 +9,7 @@
 	"action" : function ( arg )
 	{
 		var out = '';
-		var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
-		text = shell.unescapePrompt ( text, shell.json.promptSequences );
-
-		shell.window.removeChild ( shell.prompt );
-		shell.window.removeChild ( shell.cmdOut );
-		shell.window.innerHTML = '';
-
-		shell.prompt = document.createElement ( 'input' );
-		shell.prompt.setAttribute ( 'name', 'blashPrompt' );
-		shell.prompt.setAttribute ( 'type', 'text' );
-		shell.prompt.setAttribute ( 'class', 'promptInput' );
-		shell.prompt.setAttribute ( 'autocomplete', 'off' );
-		shell.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
-		shell.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
-		shell.prompt.setAttribute ( 'onblur', 'return false' );
-
-		shell.cmdOut = document.createElement ( 'div' );
-		shell.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
-		shell.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
-
-		shell.window.appendChild ( shell.prompt );
-		shell.window.appendChild ( shell.cmdOut );
-		shell.prompt.focus();
-
+		shell.refreshPrompt ( true );
 		return out;
 	},
 }

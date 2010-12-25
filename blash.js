@@ -48,6 +48,12 @@ function blash ()
 
 	/** Check if this is the first command given in this session (for fixing <br/> stuff) */
 	this.__first_cmd = true;
+
+	/** Variable set if the prompt is re-generated automatically after a command was given */
+	this.auto_prompt_refresh = true;
+
+	/** Variable set if the focus should be automatically set to the prompt line after a command */
+	this.auto_prompt_focus = true;
 	/**************************************/
 
 	this.loadCommand = function ( cmd )
@@ -139,48 +145,55 @@ function blash ()
 				}
 			}
 
-			var value = this.prompt.value;
-			var out = this.cmdOut.innerHTML;
-
-			var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
-			text = shell.unescapePrompt ( text, shell.json.promptSequences );
-
-			this.window.removeChild ( this.prompt );
-			this.window.removeChild ( this.cmdOut );
-
-			if ( this.__first_cmd && this.prompt.value.length > 0 )
+			if ( this.auto_prompt_refresh )
 			{
-				this.window.innerHTML += value + '<br/>' + out + text;
-				this.__first_cmd = false;
-			} else {
-				if ( out )
+				var value = this.prompt.value;
+				var out = this.cmdOut.innerHTML;
+
+				var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
+				text = shell.unescapePrompt ( text, shell.json.promptSequences );
+
+				this.window.removeChild ( this.prompt );
+				this.window.removeChild ( this.cmdOut );
+
+				if ( this.__first_cmd && this.prompt.value.length > 0 )
 				{
-					if ( out.match ( /^\s*<br.?>\s*/ ))
+					this.window.innerHTML += value + '<br/>' + out + text;
+					this.__first_cmd = false;
+				} else {
+					if ( out )
 					{
-						out = '';
+						if ( out.match ( /^\s*<br.?>\s*/ ))
+						{
+							out = '';
+						}
 					}
+
+					this.window.innerHTML += value + '<br/>' + out + text;
 				}
 
-				this.window.innerHTML += value + '<br/>' + out + text;
+				this.prompt = document.createElement ( 'input' );
+				this.prompt.setAttribute ( 'name', 'blashPrompt' );
+				this.prompt.setAttribute ( 'type', 'text' );
+				this.prompt.setAttribute ( 'class', 'promptInput' );
+				this.prompt.setAttribute ( 'autocomplete', 'off' );
+				this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+				this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+				this.prompt.setAttribute ( 'onblur', 'return false' );
+
+				this.cmdOut = document.createElement ( 'div' );
+				this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
+				this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
+				this.cmdOut.innerHTML = '<br/>';
+
+				this.window.appendChild ( this.prompt );
+				this.window.appendChild ( this.cmdOut );
+
+				if ( this.auto_prompt_focus )
+				{
+					this.prompt.focus();
+				}
 			}
-
-			this.prompt = document.createElement ( 'input' );
-			this.prompt.setAttribute ( 'name', 'blashPrompt' );
-			this.prompt.setAttribute ( 'type', 'text' );
-			this.prompt.setAttribute ( 'class', 'promptInput' );
-			this.prompt.setAttribute ( 'autocomplete', 'off' );
-			this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
-			this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
-			this.prompt.setAttribute ( 'onblur', 'return false' );
-
-			this.cmdOut = document.createElement ( 'div' );
-			this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
-			this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
-			this.cmdOut.innerHTML = '<br/>';
-
-			this.window.appendChild ( this.prompt );
-			this.window.appendChild ( this.cmdOut );
-			this.prompt.focus();
 		} else if ( key == 38 || key == 40 ) {
 			if ( key == 38 )
 			{
@@ -332,18 +345,24 @@ function blash ()
 				}
 			}
 
-			this.prompt.focus();
-			setTimeout ( function()  { shell.prompt.focus(); }, 1 );
-			
-			if ( this.prompt.setSelectionRange )
+			if ( this.auto_prompt_focus )
 			{
-				this.prompt.setSelectionRange ( this.prompt.value.length, this.prompt.value.length );
+				this.prompt.focus();
+				setTimeout ( function()  { shell.prompt.focus(); }, 1 );
+			
+				if ( this.prompt.setSelectionRange )
+				{
+					this.prompt.setSelectionRange ( this.prompt.value.length, this.prompt.value.length );
+				}
 			}
 
 			return false;
 		}
 
-		this.prompt.focus();
+		if ( this.auto_prompt_focus )
+		{
+			this.prompt.focus();
+		}
 	}
 
 	this.unescapePrompt = function ( prompt, sequences )
@@ -372,6 +391,54 @@ function blash ()
 		}
 
 		return prompt;
+	}
+
+	/**
+	 * \brief Refresh the shell prompt
+	 * \param clearTerm Set this variable as true if you want also to clear the terminal screen
+	 * \param clearOut Set this variable as true if you want to clear the latest output command
+	 */
+	this.refreshPrompt = function ( clearTerm, clearOut )
+	{
+		var value = this.prompt.value;
+		var out = this.cmdOut.innerHTML;
+		var text = ( this.json.promptText ) ? this.json.promptText : "[%n@%m %W] $ ";
+		text = this.unescapePrompt ( text, this.json.promptSequences );
+
+		this.window.removeChild ( this.prompt );
+		this.window.removeChild ( this.cmdOut );
+
+		if ( clearTerm )
+		{
+			this.window.innerHTML = '';
+		}
+		
+		if ( !clearOut )
+		{
+			if ( out.length > 0 )
+			{
+				var outDiv = document.createElement ( 'span' );
+				outDiv.innerHTML = '<br/>' + out + '<br/>' + text;
+				this.window.appendChild ( outDiv );
+			}
+		}
+
+		this.prompt = document.createElement ( 'input' );
+		this.prompt.setAttribute ( 'name', 'blashPrompt' );
+		this.prompt.setAttribute ( 'type', 'text' );
+		this.prompt.setAttribute ( 'class', 'promptInput' );
+		this.prompt.setAttribute ( 'autocomplete', 'off' );
+		this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+		this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+		this.prompt.setAttribute ( 'onblur', 'return false' );
+
+		this.cmdOut = document.createElement ( 'div' );
+		this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
+		this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
+
+		this.window.appendChild ( this.prompt );
+		this.window.appendChild ( this.cmdOut );
+		this.prompt.focus();
 	}
 
 	this.unescapePromptSequence = function ( prompt, sequence, text, default_text )

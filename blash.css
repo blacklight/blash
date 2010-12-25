@@ -17,6 +17,16 @@ input.promptInput
 	width : 500px;
 }
 
+input.password
+{
+	background-color : black;
+	border : 0;
+	color : #888;
+	font-family : Terminus, courier, monospace, fixed;
+	font-size : 13px;
+	width : 500px;
+}
+
 div#blashWindow
 {
 	width : 800px;

@@ -189,11 +189,13 @@
 		"cat",
 		"cd",
 		"clear",
+		"echo",
 		"eval",
 		"find",
 		"ls",
 		"man",
 		"pwd",
+		"useradd",
 		"whoami",
 	],
 }

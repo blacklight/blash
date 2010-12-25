@@ -1,0 +1,15 @@
+{
+	"name" : "echo",
+
+	"info" : {
+		"syntax" : "echo [text]",
+		"brief" : "Display a line of text",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = arg + "<br/>\n";
+		return out;
+	},
+}
+

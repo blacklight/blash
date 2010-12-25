@@ -1,0 +1,113 @@
+{
+	"name" : "useradd",
+
+	"info" : {
+		"syntax" : "useradd &lt;username&gt;",
+		"brief" : "Create a new user on the system",
+	},
+
+	"password" : '',
+	"repeatPassword" : '',
+
+	"keyPassword" : function ( e )
+	{
+		var evt = ( window.event ) ? window.event : e;
+		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
+		var password = document.getElementsByName ( "password" )[0];
+		var repeatPassword = document.getElementsByName ( "repeatPassword" )[0];
+		var repeatPasswordText = document.getElementById ( "repeatPasswordText" );
+
+		if ( key == 13 && password.value.length > 0 )
+		{
+			repeatPassword.style.visibility = 'visible';
+			repeatPasswordText.style.visibility = 'visible';
+			repeatPassword.focus();
+		}
+	},
+
+	"keyRepeatPassword" : function ( e )
+	{
+		var evt = ( window.event ) ? window.event : e;
+		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
+		var password = document.getElementsByName ( "password" )[0];
+		var repeatPassword = document.getElementsByName ( "repeatPassword" )[0];
+		var repeatPasswordText = document.getElementById ( "repeatPasswordText" );
+
+		if ( key == 13 && password.value.length > 0 )
+		{
+			if ( password.value != repeatPassword.value )
+			{
+				shell.cmdOut.innerHTML = 'The passwords do not match';
+			} else {
+				var users_php = window.location.href;
+				users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+				params = 'action=add&user=' + escape ( shell.newuser ) + '&pass=' + md5 ( password.value );
+
+				var http = new XMLHttpRequest();
+				http.open ( "POST", users_php, true );
+				http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				http.setRequestHeader("Content-length", params.length);
+				http.setRequestHeader("Connection", "close");
+
+				http.onreadystatechange = function ()
+				{
+					if ( http.readyState == 4 && http.status == 200 )
+					{
+						if ( http.responseText.length > 0 )
+						{
+							shell.cmdOut.innerHTML = http.responseText;
+						} else {
+							shell.cmdOut.innerHTML = '';
+						}
+
+						shell.refreshPrompt ( false, false );
+					}
+				}
+
+				http.send ( params );
+				shell.cmdOut.innerHTML = '';
+			}
+
+			shell.auto_prompt_focus = true;
+			shell.auto_prompt_refresh = true;
+			shell.refreshPrompt ( false, false );
+		}
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "Usage: " + this.name + " &lt;username&gt;<br/>\n";
+		}
+
+		shell.keyPassword = this.keyPassword;
+		shell.keyRepeatPassword = this.keyRepeatPassword;
+		shell.newuser = arg;
+
+		if ( shell.__first_cmd )
+		{
+			shell.cmdOut.innerHTML = '<br/>';
+			shell.__first_cmd = false;
+		}
+
+		shell.cmdOut.innerHTML += 'Password: <input type="password" ' +
+			'name="password" class="password" ' +
+			'onkeyup="shell.keyPassword ( event )">' +
+			'<br/><span id="repeatPasswordText" style="visibility: hidden">' +
+			'Repeat password: </span>' +
+			'<input type="password" name="repeatPassword" class="password" ' +
+			'style="visibility: hidden" onkeyup="shell.keyRepeatPassword ( event )"><br/>';
+
+		shell.auto_prompt_focus = false;
+		shell.auto_prompt_refresh = false;
+
+		this.password = document.getElementsByName ( "password" )[0];
+		this.password.focus();
+
+		return out;
+	},
+}
+
