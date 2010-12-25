@@ -24,9 +24,9 @@
 	"promptSequences" : [
 		{
 			"sequence" : "%n",
-			"default_text" : "blacklight",
+			"default_text" : "guest",
 			"text" : function ()  {
-				return shell.json.user;
+				return shell.user;
 			},
 		},
 		{
@@ -38,7 +38,7 @@
 		},
 		{
 			"sequence" : "%W",
-			"default_text" : "~",
+			"default_text" : "/",
 			"text" : function ()  {
 				return shell.path;
 			},
@@ -195,6 +195,7 @@
 		"ls",
 		"man",
 		"pwd",
+		"su",
 		"useradd",
 		"whoami",
 	],

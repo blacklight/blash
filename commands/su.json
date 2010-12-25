@@ -1,0 +1,87 @@
+{
+	"name" : "su",
+
+	"info" : {
+		"syntax" : "su [username]",
+		"brief" : "Change user ID or become superuser",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+
+		if ( !arg || arg.length == 0 )
+		{
+			arg = 'root';
+		}
+
+		if ( shell.__first_cmd )
+		{
+			shell.cmdOut.innerHTML = '<br/>';
+			shell.__first_cmd = false;
+		}
+
+		shell.getPassword = this.getPassword;
+		shell.newuser = arg;
+
+		shell.cmdOut.innerHTML += 'Password: <input type="password" ' +
+			'name="password" class="password" ' +
+			'onkeyup="shell.getPassword ( event )">' +
+			'<br/>';
+
+		shell.auto_prompt_focus = false;
+		shell.auto_prompt_refresh = false;
+
+		this.password = document.getElementsByName ( "password" )[0];
+		this.password.focus();
+
+		return out;
+	},
+
+	"getPassword" : function ( e )
+	{
+		var evt = ( window.event ) ? window.event : e;
+		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
+		var password = document.getElementsByName ( "password" )[0];
+
+		if ( key == 13 && password.value.length > 0 )
+		{
+			var users_php = window.location.href;
+			users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+			params = 'action=login&user=' + escape ( shell.newuser ) + '&pass=' + md5 ( password.value );
+
+			var http = new XMLHttpRequest();
+			http.open ( "POST", users_php, true );
+			http.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
+			http.setRequestHeader ( "Content-length", params.length );
+			http.setRequestHeader ( "Connection", "close" );
+
+			http.onreadystatechange = function ()
+			{
+				if ( http.readyState == 4 && http.status == 200 )
+				{
+					if ( http.responseText.match ( /^Successfully logged in as '(.+?)'\s+(.*)\s*$/i ))
+					{
+						var user = RegExp.$1;
+						var auth = RegExp.$2;
+
+						shell.user = user;
+						shell.cmdOut.innerHTML = "Successfully logged in as '" + user + "'";
+					} else  {
+						shell.cmdOut.innerHTML = '';
+					}
+
+					shell.refreshPrompt ( false, false );
+				}
+			}
+
+			http.send ( params );
+
+			shell.cmdOut.innerHTML = '';
+			shell.auto_prompt_focus = true;
+			shell.auto_prompt_refresh = true;
+			shell.refreshPrompt ( false, false );
+		}
+	},
+}
+

@@ -13,6 +13,9 @@ var shell = null;
 function blash ()
 {
 	/************ ATTRIBUTES **************/
+	/** Current user */
+	this.user = '';
+
 	/** Object containing the parsed JSON configuration object */
 	this.json = {};
 
@@ -75,6 +78,38 @@ function blash ()
 		http.send ( null );
 	}
 
+	if ( document.cookie )
+	{
+		if ( document.cookie.match ( 'auth=' ) && document.cookie.match ( 'username=([^;]+);?' ))
+		{
+			this.user = RegExp.$1;
+			var params = 'action=getuser';
+			var users_php = window.location.href;
+			users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+
+			var xml = new XMLHttpRequest();
+			xml.open ( "POST", users_php, true );
+			xml.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
+			xml.setRequestHeader ( "Content-length", params.length );
+			xml.setRequestHeader ( "Connection", "close" );
+
+			xml.onreadystatechange = function ()
+			{
+				if ( xml.readyState == 4 && xml.status == 200 )
+				{
+					if ( xml.responseText.length > 0 )
+					{
+						shell.user = xml.responseText;
+					} else {
+						shell.user = shell.json.user;
+					}
+				}
+			}
+
+			xml.send ( params );
+		}
+	}
+
 	this.prompt.focus();
 
 	var json_config = window.location.href;
@@ -88,6 +123,11 @@ function blash ()
 		if ( http.readyState == 4 && http.status == 200 )
 		{
 			shell.json = eval ( '(' + http.responseText + ')' );
+
+			if ( shell.user == '' )
+			{
+				shell.user = shell.json.user;
+			}
 
 			shell.promptText.innerHTML = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
 			shell.promptText.innerHTML = shell.unescapePrompt ( promptText.innerHTML, shell.json.promptSequences );
