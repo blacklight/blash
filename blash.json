@@ -192,6 +192,7 @@
 		"echo",
 		"eval",
 		"find",
+		"logout",
 		"ls",
 		"man",
 		"pwd",

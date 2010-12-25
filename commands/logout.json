@@ -1,0 +1,23 @@
+{
+	"name" : "logout",
+
+	"info" : {
+		"syntax" : "logout",
+		"brief" : "End the current user session",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+
+		if ( shell.user == shell.json.user )
+		{
+			return out;
+		}
+
+		shell.user = shell.json.user;
+		document.cookie = '';
+		return out;
+	},
+}
+
