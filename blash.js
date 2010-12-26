@@ -214,9 +214,12 @@ function blash ()
 					}
 				}
 			}
+
+			return false;
 		} else if ( key == 76 && evt.ctrlKey ) {
 			// CTRL-l clears the screen
 			this.refreshPrompt ( true );
+			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
 			if ( this.prompt.value.length != 0 && ( key != 67 || !evt.ctrlKey ))
 			{
@@ -296,7 +299,12 @@ function blash ()
 					this.prompt.focus();
 				}
 			}
-		} else if ( key == 38 || key == 40 ) {
+
+			if ( key == 67 && evt.ctrlKey )
+			{
+				return false;
+			}
+		} else if (( key == 38 || key == 40 ) && this.history.length > 0 ) {
 			if ( key == 38 )
 			{
 				if ( this.history_index < 0 )
@@ -319,6 +327,12 @@ function blash ()
 					this.history_index++;
 					this.prompt.value = this.history[ this.history_index ];
 				}
+			}
+
+			// Put the cursor at the end
+			if ( this.prompt.setSelectionRange )
+			{
+				this.prompt.setSelectionRange ( this.prompt.value.length, this.prompt.value.length );
 			}
 
 			this.prompt.focus();
