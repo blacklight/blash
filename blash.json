@@ -195,6 +195,7 @@
 		"logout",
 		"ls",
 		"man",
+		"passwd",
 		"pwd",
 		"su",
 		"useradd",

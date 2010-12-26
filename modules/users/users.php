@@ -1,6 +1,39 @@
 <?php
 
 include 'userlist.php';
+
+function getUser ()
+{
+	include 'userlist.php';
+
+	if ( isset ( $_COOKIE['username'] ) && isset ( $_COOKIE['auth'] ))
+	{
+		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+		{
+			return "Unable to open the users XML file\n";
+		}
+
+		for ( $i = 0; $i < count ( $xml->user ); $i++ )
+		{
+			if ( !strcasecmp ( $xml->user[$i]['name'], $_COOKIE['username'] ))
+			{
+				$auth = md5 ( $xml->user[$i]['name'] . $xml->user[$i]['pass'] );
+
+				if ( !strcasecmp ( $auth, $_COOKIE['auth'] ))
+				{
+					return $xml->user[$i]['name'];
+				} else {
+					return "guest";
+				}
+			}
+		}
+
+		return "guest";
+	}
+
+	return "guest";
+}
+
 $action = $_REQUEST['action'];
 
 if ( $action == null )
@@ -104,40 +137,71 @@ switch ( $action )
 		}
 
 		print "Username not found: '$username'\n";
+		return 1;
 		break;
 
 	case 'getuser':
-		if ( isset ( $_COOKIE['username'] ) && isset ( $_COOKIE['auth'] ))
+		print getUser();
+		return 0;
+		break;
+
+	case 'logout':
+		setcookie ( 'username', '', 0, "/" );
+		setcookie ( 'auth', '', 0, "/" );
+		break;
+
+	case 'changepwd':
+		$old_pass = $_REQUEST['oldpass'];
+		$new_pass = $_REQUEST['newpass'];
+		$user = $_REQUEST['user'];
+		$cur_user = getUser();
+
+		// If the current user is not root and he's trying to change someone else's password, STOP HIM!
+		if ( $cur_user != 'root' && $cur_user != $user )
 		{
-			if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
-			{
-				print "Unable to open the users XML file\n";
-				return 1;
-			}
-
-			for ( $i = 0; $i < count ( $xml->user ) && !$found; $i++ )
-			{
-				if ( !strcasecmp ( $xml->user[$i]['name'], $_COOKIE['username'] ))
-				{
-					$auth = md5 ( $xml->user[$i]['name'] . $xml->user[$i]['pass'] );
-
-					if ( !strcasecmp ( $auth, $_COOKIE['auth'] ))
-					{
-						print $xml->user[$i]['name'];
-						return 0;
-					} else {
-						print "guest";
-						return 1;
-					}
-				}
-			}
-
-			print "guest";
+			print "You cannot change the password for the user '$user'\n";
 			return 1;
 		}
 
-		print "guest";
-		return 1;
+		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+		{
+			print "Unable to open the users XML file\n";
+			return 1;
+		}
+
+		for ( $i = 0; $i < count ( $xml->user ); $i++ )
+		{
+			// If we've found the user whose password should be changed...
+			if ( !strcasecmp ( $xml->user[$i]['name'], $user ))
+			{
+				$found = true;
+
+				// If the current user is not root, check his own inserted current password
+				if ( $cur_user != 'root' )
+				{
+					if ( $xml->user[$i]['pass'] != $old_pass )
+					{
+						print "The provided current password is wrong\n";
+						return 1;
+					}
+				}
+
+				$xml->user[$i]['pass'] = $new_pass;
+
+				if ( !( $fp = fopen ( 'userlist.php', 'w' )))
+				{
+					print "Unable to change the password for the specified user, unknown error\n";
+					return 1;
+				}
+
+				fwrite ( $fp, "<?php\n\n\$xmlcontent = <<<XML\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
+				fclose ( $fp );
+
+				print 'Password successfully changed for the user '.$user."\n";
+				return 0;
+			}
+		}
+
 		break;
 }
 
