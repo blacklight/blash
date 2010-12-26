@@ -154,9 +154,71 @@ function blash ()
 		var evt = ( window.event ) ? window.event : e;
 		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
 
-		if ( key == 13 || key == 10 )
+		if ( key == 68 && evt.ctrlKey )
 		{
-			if ( this.prompt.value.length != 0 )
+			/* CTRL-d -> logout */
+			for ( i=0; i < this.commands.length; i++ )
+			{
+				if ( this.commands[i].name == 'logout' )
+				{
+					var out = this.commands[i].action ();
+
+					if ( this.auto_prompt_refresh )
+					{
+						var value = this.prompt.value;
+						var out = this.cmdOut.innerHTML;
+
+						var text = ( shell.json.promptText ) ? shell.json.promptText : "[%n@%m %W] $ ";
+						text = shell.unescapePrompt ( text, shell.json.promptSequences );
+
+						this.window.removeChild ( this.prompt );
+						this.window.removeChild ( this.cmdOut );
+
+						if ( this.__first_cmd && this.prompt.value.length > 0 )
+						{
+							this.window.innerHTML += value + '<br/>' + out + text;
+							this.__first_cmd = false;
+						} else {
+							if ( out )
+							{
+								if ( out.match ( /^\s*<br.?>\s*/ ))
+								{
+									out = '';
+								}
+							}
+
+							this.window.innerHTML += value + '<br/>' + out + text;
+						}
+
+						this.prompt = document.createElement ( 'input' );
+						this.prompt.setAttribute ( 'name', 'blashPrompt' );
+						this.prompt.setAttribute ( 'type', 'text' );
+						this.prompt.setAttribute ( 'class', 'promptInput' );
+						this.prompt.setAttribute ( 'autocomplete', 'off' );
+						this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+						this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+						this.prompt.setAttribute ( 'onblur', 'return false' );
+
+						this.cmdOut = document.createElement ( 'div' );
+						this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
+						this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
+						this.cmdOut.innerHTML = '<br/>';
+
+						this.window.appendChild ( this.prompt );
+						this.window.appendChild ( this.cmdOut );
+
+						if ( this.auto_prompt_focus )
+						{
+							this.prompt.focus();
+						}
+					}
+				}
+			}
+		} else if ( key == 76 && evt.ctrlKey ) {
+			// CTRL-l clears the screen
+			this.refreshPrompt ( true );
+		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
+			if ( this.prompt.value.length != 0 && ( key != 67 || !evt.ctrlKey ))
 			{
 				this.prompt.value.match ( /^([^\s]+)\s*(.*)$/ );
 				var cmd = RegExp.$1;
