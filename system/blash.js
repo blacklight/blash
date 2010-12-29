@@ -162,14 +162,14 @@ function blash ()
 
 				if ( module.name == 'users' )
 				{
-					has_users = module.enabled;
+					shell.has_users = module.enabled;
 					break;
 				}
 			}
 
 			shell.files_json = window.location.href;
 
-			if ( has_users )
+			if ( shell.has_users )
 			{
 				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
 			} else {

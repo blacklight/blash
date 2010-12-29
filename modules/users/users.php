@@ -182,7 +182,6 @@ switch ( $action )
 		}
 
 		print getPerms ( $res );
-		// var_dump ( getPerms ( $res ));
 		break;
 }
 

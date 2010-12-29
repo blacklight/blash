@@ -2,12 +2,13 @@ blash - BlackLight's shell
 An AJAX CMS for browsing your web site through a shell-oriented interface
 by BlackLight, <blacklight@autistici.org>, http://0x00.ath.cx
 
+=================================================================================
 Q.: What is blash?
 A.: blash is a tiny CMS developed in AJAX that allows you to browse your website
 through a shell-oriented interface. The way to use it is quite simple and
 inspired from software like bash and zsh, you can see an example running at the
 address http://0x00.ath.cx/blash/index.html.
-
+=================================================================================
 Q.: How can a web site be represented like a filesystem browsable from a terminal?
 A.: A directory is fundamentally a `container' of logically correlated items (for
 example, a directory could be blog/, or forum/, or news/, and so on). A page in your
@@ -26,10 +27,20 @@ open popup windows). The pages having static content printed to the
 pseudo-terminal are represented in normal font, the files that links to an
 external content is instead represented as an `executable' file (by default, in
 colour green).
-
+=================================================================================
+Q.: How can I use blash on my own web server?
+A.: You just need, if you want to use the users module (strongly suggested), PHP
+>= 5.2.0 installed on your web server, otherwise just a web server that can
+static pages. All you need to do is to put the content of blash in your favourite
+directory on your web server, and then it should all work out of the box. If you
+do not have PHP support on your web server, go to system/blash.json and remove
+"users" from the used modules or set it its "enabled" field to "false". *PLEASE
+REMEMBER, ONCE BLASH IS READY, TO CHANGE THE ROOT PASSWORD BY TYPING "su" AND THEN
+"passwd"*
+=================================================================================
 Q.: Which is the default password for 'root' user?
 A.: blash. Remember to use it only one time, then change it using the passwd command.
-
+=================================================================================
 Q.: Which browsers are compatible with blash?
 A.: So far blash has been successfully tested with the following browsers:
 
@@ -46,7 +57,7 @@ A.: So far blash has been successfully tested with the following browsers:
 However, any browser with a decent JavaScript engine should give no problem with
 blash. Internet Explorer is currently NOT working with blash, at least any
 release <= 8. I'm sorry, choose a decent browser.
-
+=================================================================================
 Q.: How do I add the contents for my web site in blash?
 A.: Open the file system/blash.json. This JSON file contains the preferences for your
 shell (banner, prompt style, default user, escape sequences recognized in the
@@ -63,7 +74,7 @@ Each content can include the following fields:
 should point to
 - content (for files only), if the file has static content that should be
 printed in the pseudo-terminal window, this field contains its content
-
+=================================================================================
 Q.: Can I add more commands?
 A.: Sure you can. Take a look at directory `commands' for seeing the definition
 of default commands. Each commands is represented as a JSON file containing the
@@ -83,4 +94,11 @@ them.
 
 After creating your JSON file with the new command, don't forget to add the name
 of the command to the array `commands' in blash.json so that the CMS sees it.
+=================================================================================
+Q.: Can I add more modules?
+A.: Of course you can. Just place the code of your module in modules/MODULENAME
+directory and enable it by adding to system/blash.json a new entry in "modules"
+array following the example of "users" module, by setting the "enabled" field to
+"true" if you want to enable it.
+=================================================================================
 
