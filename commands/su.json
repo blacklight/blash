@@ -10,6 +10,11 @@
 	{
 		var out = '';
 
+		if ( !shell.has_users )
+		{
+			return "Users module not enabled<br/>\n";
+		}
+
 		if ( !arg || arg.length == 0 )
 		{
 			arg = 'root';
@@ -60,17 +65,29 @@
 			{
 				if ( http.readyState == 4 && http.status == 200 )
 				{
-					if ( http.responseText.match ( /^Successfully logged in as '(.+?)'\s+(.*)\s*$/i ))
+					if ( http.responseText.match ( /^Successfully logged in as '(.+?)'/i ))
 					{
 						var user = RegExp.$1;
-						var auth = RegExp.$2;
-
 						shell.user = user;
-						shell.cmdOut.innerHTML = "Successfully logged in as '" + user + "'";
-					} else  {
-						shell.cmdOut.innerHTML = '';
+
+						var files_config = window.location.href;
+						files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+						var http2 = new XMLHttpRequest();
+						http2.open ( "GET", files_config, true );
+
+						http2.onreadystatechange = function ()
+						{
+							if ( http2.readyState == 4 && http2.status == 200 )
+							{
+								shell.files = eval ( '(' + http2.responseText + ')' );
+							}
+						}
+
+						http2.send ( null );
 					}
 
+					shell.cmdOut.innerHTML = http.responseText;
 					shell.refreshPrompt ( false, false );
 				}
 			}

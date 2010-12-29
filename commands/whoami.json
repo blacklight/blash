@@ -9,6 +9,12 @@
 	"action" : function ( arg )
 	{
 		var out = '';
+
+		if ( !shell.has_users )
+		{
+			return "guest<br/>\n";
+		}
+
 		
 		if ( arg )
 		{

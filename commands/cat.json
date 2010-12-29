@@ -9,14 +9,14 @@
 	"action" : function ( arg )
 	{
 		var out = '';
+		var found = false;
+		var dir = shell.files;
 
 		if ( !arg || arg.length == 0 )
 		{
 			return "Argument required<br/>\n";
 		}
 
-		var found = false;
-		var dir = shell.json.directories;
 		arg = shell.expandPath ( arg );
 
 		for ( var i=0; i < dir.length && !found; i++ )
@@ -39,7 +39,15 @@
 			}
 		}
 
+		if ( !found )
+		{
+			arg = arg.replace ( '<', '&lt;' );
+			arg = arg.replace ( '>', '&gt;' );
+			return "cat: " + arg + ": No such file or directory<br/>\n";
+		}
+
+		out = out.replace ( /<br\/>\s*$/, '' );
 		return out;
-	},
+	}
 }
 

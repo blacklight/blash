@@ -97,6 +97,12 @@
 	{
 		var out = '';
 
+		if ( !shell.has_users )
+		{
+			return "Users module not enabled<br/>\n";
+		}
+
+
 		shell.auto_prompt_focus = false;
 		shell.auto_prompt_refresh = false;
 		shell.newuser = arg;

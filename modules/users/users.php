@@ -1,38 +1,7 @@
 <?php
 
 include 'userlist.php';
-
-function getUser ()
-{
-	include 'userlist.php';
-
-	if ( isset ( $_COOKIE['username'] ) && isset ( $_COOKIE['auth'] ))
-	{
-		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
-		{
-			return "Unable to open the users XML file\n";
-		}
-
-		for ( $i = 0; $i < count ( $xml->user ); $i++ )
-		{
-			if ( !strcasecmp ( $xml->user[$i]['name'], $_COOKIE['username'] ))
-			{
-				$auth = md5 ( $xml->user[$i]['name'] . $xml->user[$i]['pass'] );
-
-				if ( !strcasecmp ( $auth, $_COOKIE['auth'] ))
-				{
-					return $xml->user[$i]['name'];
-				} else {
-					return "guest";
-				}
-			}
-		}
-
-		return "guest";
-	}
-
-	return "guest";
-}
+include 'user_utils.php';
 
 $action = $_REQUEST['action'];
 
@@ -90,7 +59,7 @@ switch ( $action )
 			return 1;
 		}
 
-		fwrite ( $fp, "<?php\n\n\$xmlcontent = <<<XML\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
+		fwrite ( $fp, '<?php'."\n\n".'$xmlcontent = <<<XML'."\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
 		fclose ( $fp );
 
 		print 'User "'.$username.' successfully added, home directory set to "/home/'.$username."\"\n";
@@ -130,7 +99,7 @@ switch ( $action )
 					setcookie ( 'username', $xml->user[$i]['name'], 0, "/" );
 					setcookie ( 'auth', $auth, 0, "/" );
 
-					print "Successfully logged in as '$username' $auth\n";
+					print "Successfully logged in as '$username'\n";
 					return 0;
 				}
 			}
@@ -202,6 +171,18 @@ switch ( $action )
 			}
 		}
 
+		break;
+
+	case 'getperms':
+		$res = $_REQUEST['resource'];
+
+		if ( !$res )
+		{
+			return false;
+		}
+
+		print getPerms ( $res );
+		// var_dump ( getPerms ( $res ));
 		break;
 }
 

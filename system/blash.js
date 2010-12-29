@@ -19,6 +19,9 @@ function blash ()
 	/** Object containing the parsed JSON configuration object */
 	this.json = {};
 
+	/** Object containing the files in the shell */
+	this.files = {};
+
 	/** Shell window object */
 	this.window = document.getElementById ( "blashWindow" );
 
@@ -57,6 +60,12 @@ function blash ()
 
 	/** Variable set if the focus should be automatically set to the prompt line after a command */
 	this.auto_prompt_focus = true;
+
+	/** Variable set if the current implementation of blash uses the user module */
+	this.has_users = false;
+
+	/** Path to the file containing the files directory */
+	this.files_json = window.location.href;
 	/**************************************/
 
 	this.loadCommand = function ( cmd )
@@ -113,7 +122,7 @@ function blash ()
 	this.prompt.focus();
 
 	var json_config = window.location.href;
-	json_config = json_config.replace ( /\/([a-zA-Z\.]+)$/, '/blash.json' );
+	json_config = json_config.replace ( /\/([a-zA-Z\.]+)$/, '/system/blash.json' );
 
 	var http = new XMLHttpRequest();
 	http.open ( "GET", json_config, true );
@@ -144,6 +153,42 @@ function blash ()
 			{
 				shell.loadCommand ( shell.json.commands[i] );
 			}
+
+			shell.has_users = false;
+
+			for ( var i=0; i < shell.json.modules.length; i++ )
+			{
+				var module = shell.json.modules[i];
+
+				if ( module.name == 'users' )
+				{
+					has_users = module.enabled;
+					break;
+				}
+			}
+
+			shell.files_json = window.location.href;
+
+			if ( has_users )
+			{
+				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+			} else {
+				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z\.]+)$/, '/system/files.json' );
+			}
+
+			var http2 = new XMLHttpRequest();
+			http2.open ( "GET", shell.files_json, true );
+
+			http2.onreadystatechange = function ()
+			{
+				if ( http2.readyState == 4 && http2.status == 200 )
+				{
+					shell.files = eval ( '(' + http2.responseText + ')' );
+				}
+			}
+
+			http2.send ( null );
+
 		}
 	}
 
@@ -237,9 +282,12 @@ function blash ()
 						cmd_found = true;
 						var out = this.commands[i].action ( arg );
 
-						if ( out.length > 0 )
+						if ( out )
 						{
-							this.cmdOut.innerHTML = out;
+							if ( out.length > 0 )
+							{
+								this.cmdOut.innerHTML = out;
+							}
 						}
 					}
 				}
@@ -345,7 +393,7 @@ function blash ()
 				var path = arg;
 				var dirs = new Array();
 
-				for ( var i in this.json.directories )
+				for ( var i in this.files )
 				{
 					if ( arg.match ( /^[^\/]/ ) )
 					{
@@ -355,11 +403,11 @@ function blash ()
 
 					var re = new RegExp ( '^' + path + '[^/]*$' );
 
-					if ( this.json.directories[i].path.match ( re ))
+					if ( this.files[i].path.match ( re ))
 					{
 						dirs.push ({
-							'name' : this.json.directories[i].path,
-							'type' : this.json.directories[i].type,
+							'name' : this.files[i].path,
+							'type' : this.files[i].type,
 						});
 					}
 				}

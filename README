@@ -27,6 +27,9 @@ pseudo-terminal are represented in normal font, the files that links to an
 external content is instead represented as an `executable' file (by default, in
 colour green).
 
+Q.: Which is the default password for 'root' user?
+A.: blash. Remember to use it only one time, then change it using the passwd command.
+
 Q.: Which browsers are compatible with blash?
 A.: So far blash has been successfully tested with the following browsers:
 
@@ -45,11 +48,14 @@ blash. Internet Explorer is currently NOT working with blash, at least any
 release <= 8. I'm sorry, choose a decent browser.
 
 Q.: How do I add the contents for my web site in blash?
-A.: Open the file blash.json. This JSON file contains the preferences for your
+A.: Open the file system/blash.json. This JSON file contains the preferences for your
 shell (banner, prompt style, default user, escape sequences recognized in the
-prompt string...), the commands to be used, and the array "directories". This
-array is the container of your web site data. Each element can have the
-following fields:
+prompt string...), the commands to be used, and so on. Change this file in order to
+change the preferences of your CMS.
+
+The contents of your web site are held in the file system/files_json.php. Modify this
+file directly using the example contents as trace for adding or removing new contents.
+Each content can include the following fields:
 
 - path (MANDATORY), the full absolute path that identifies that resource
 - type (MANDATORY), the resource type (directory or file)

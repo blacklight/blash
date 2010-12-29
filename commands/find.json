@@ -22,9 +22,9 @@
 
 		var re = new RegExp ( arg, "i" );
 
-		for ( var i in shell.json.directories )
+		for ( var i in shell.files )
 		{
-			var dir = shell.json.directories[i];
+			var dir = shell.files[i];
 
 			if ( dir.path.match ( re ))
 			{

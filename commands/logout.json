@@ -10,6 +10,12 @@
 	{
 		var out = '';
 
+		if ( !shell.has_users )
+		{
+			return "Users module not enabled<br/>\n";
+		}
+
+
 		if ( shell.user == shell.json.user )
 		{
 			return out;
@@ -27,6 +33,29 @@
 		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
 		http.setRequestHeader( "Content-length", params.length );
 		http.setRequestHeader( "Connection", "close" );
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				var files_config = window.location.href;
+				files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+				var http2 = new XMLHttpRequest();
+				http2.open ( "GET", files_config, true );
+
+				http2.onreadystatechange = function ()
+				{
+					if ( http2.readyState == 4 && http2.status == 200 )
+					{
+						shell.files = eval ( '(' + http2.responseText + ')' );
+					}
+				}
+
+				http2.send ( null );
+			}
+		}
+
 		http.send ( params );
 		return out;
 	},

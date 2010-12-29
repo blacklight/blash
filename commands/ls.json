@@ -9,12 +9,13 @@
 	"action" : function ( arg )
 	{
 		var dirs = new Array();
-		var out = '';
 		var exists = false;
+		var re = null;
 
 		if ( !arg || arg.length == 0 )
 		{
-			var re = null;
+			re = null;
+			arg = shell.path;
 
 			if ( shell.path == '/' )
 			{
@@ -24,14 +25,24 @@
 			}
 		} else if ( arg && arg.length > 0 ) {
 			arg = shell.expandPath ( arg );
-			var re = new RegExp ( '^' + arg + '/[^/]+$' );
+			re = new RegExp ( '^' + arg + '/[^/]+$' );
 		}
 
-		for ( var i=0; i < shell.json.directories.length; i++ )
-		{
-			var dir = shell.json.directories[i];
+		shell.re = re;
+		return this.ls ( arg );
+	},
 
-			if ( dir.path.match ( re ))
+	"ls" : function ( arg )
+	{
+		var dirs = new Array();
+		var out = '';
+		var exists = false;
+
+		for ( var i=0; i < shell.files.length; i++ )
+		{
+			var dir = shell.files[i];
+
+			if ( dir.path.match ( shell.re ))
 			{
 				exists = true;
 				dir.path.match ( /\/([^\/]+)$/ );
@@ -114,9 +125,9 @@
 
 		if ( !exists )
 		{
-			for ( var i=0; i < shell.json.directories.length; i++ )
+			for ( var i=0; i < shell.files.length; i++ )
 			{
-				var dir = shell.json.directories[i];
+				var dir = shell.files[i];
 				arg = arg.replace ( /\/+$/, '' );
 
 				if ( dir.path.match ( arg ))
@@ -135,9 +146,9 @@
 						(( shell.path == '/' ) ? '' : '/' ) + arg );
 			}
 
-			for ( var i=0; i < shell.json.directories.length; i++ )
+			for ( var i=0; i < shell.files.length; i++ )
 			{
-				var dir = shell.json.directories[i];
+				var dir = shell.files[i];
 
 				if ( dir.path.match ( re ))
 				{

@@ -18,13 +18,13 @@
 		var found = false;
 		arg = shell.expandPath ( arg );
 
-		for ( var i=0; i < shell.json.directories.length && !found; i++ )
+		for ( var i=0; i < shell.files.length && !found; i++ )
 		{
-			if ( shell.json.directories[i].path == arg )
+			if ( shell.files[i].path == arg )
 			{
 				found = true;
 
-				if ( shell.json.directories[i].type != 'directory' )
+				if ( shell.files[i].type != 'directory' )
 				{
 					return "cd: not a directory: " + arg + "<br/>\n";
 				}

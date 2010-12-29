@@ -78,6 +78,12 @@
 	{
 		var out = '';
 
+		if ( !shell.has_users )
+		{
+			return "Users module not enabled<br/>\n";
+		}
+
+
 		if ( !arg || arg.length == 0 )
 		{
 			return "Usage: " + this.name + " &lt;username&gt;<br/>\n";
