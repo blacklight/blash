@@ -184,6 +184,29 @@ function blash ()
 				if ( http2.readyState == 4 && http2.status == 200 )
 				{
 					shell.files = eval ( '(' + http2.responseText + ')' );
+
+					// Remove duplicates
+					var tmp = new Array();
+
+					for ( var i in shell.files )
+					{
+						var contains = false;
+
+						for ( var j=0; j < tmp.length && !contains; j++ )
+						{
+							if ( shell.files[i].path == tmp[j].path )
+							{
+								contains = true;
+							}
+						}
+
+						if ( !contains )
+						{
+							tmp.push ( shell.files[i] );
+						}
+					}
+
+					shell.files = tmp;
 				}
 			}
 
@@ -618,8 +641,21 @@ function blash ()
 		return prompt;
 	}
 
+	/**
+	 * \brief Expand an argument as path, transforming it into an absolute path, removing extra slashes and expanding '..' notations
+	 */
 	this.expandPath = function ( arg )
 	{
+		if ( !arg || arg.length == 0 )
+		{
+			return false;
+		}
+
+		while ( arg.match ( /(^|\/)\.\// ))
+		{
+			arg = arg.replace ( /(^|\/)\.\//, '/' );
+		}
+
 		if ( arg.match ( /^[^\/]/ ))
 		{
 			arg = this.path + '/' + arg;
@@ -655,6 +691,27 @@ function blash ()
 		}
 
 		return arg;
+	}
+
+	/**
+	 * \brief Expand the star '*' notations inside of a path
+	 */
+	this.expandStar = function ( arg )
+	{
+		arg = arg.replace ( /([^\\])?\*/g, '$1.*' );
+
+		var matches = new Array();
+		var re = new RegExp ( arg );
+
+		for ( var i=0; i < this.files.length; i++ )
+		{
+			if ( this.files[i].path.match ( re ))
+			{
+				matches.push ( this.files[i] );
+			}
+		}
+
+		return matches;
 	}
 }
 

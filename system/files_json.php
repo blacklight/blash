@@ -97,11 +97,6 @@ $files_json = <<<JSON
 		"content" : "Custom blash configuration file"
 	},
 	{
-		"path" : "/home/guest/mbox",
-		"type" : "file",
-		"content" : "No new mail"
-	},
-	{
 		"path" : "/news/news1",
 		"type" : "file",
 		"content" : "Nothing new under the sun"

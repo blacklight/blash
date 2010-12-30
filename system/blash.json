@@ -59,6 +59,7 @@
 		"echo",
 		"eval",
 		"find",
+		"grep",
 		"logout",
 		"ls",
 		"man",

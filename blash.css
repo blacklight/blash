@@ -66,3 +66,18 @@ span.brief
 	color : green;
 }
 
+span.filematch
+{
+	color : #672377;
+}
+
+span.linematch
+{
+	color : #73d216;
+}
+
+span.match
+{
+	color : #992010;
+}
+

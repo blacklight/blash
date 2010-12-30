@@ -81,6 +81,29 @@
 							if ( http2.readyState == 4 && http2.status == 200 )
 							{
 								shell.files = eval ( '(' + http2.responseText + ')' );
+
+								// Remove duplicates
+								var tmp = new Array();
+
+								for ( var i in shell.files )
+								{
+									var contains = false;
+
+									for ( var j=0; j < tmp.length && !contains; j++ )
+									{
+										if ( shell.files[i].path == tmp[j].path )
+										{
+											contains = true;
+										}
+									}
+
+									if ( !contains )
+									{
+										tmp.push ( shell.files[i] );
+									}
+								}
+
+								shell.files = tmp;
 							}
 						}
 
