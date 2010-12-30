@@ -3,6 +3,8 @@
 include 'userlist.php';
 include 'user_utils.php';
 
+global $sudo_cmd;
+
 $action = $_REQUEST['action'];
 
 if ( $action == null )
@@ -24,19 +26,19 @@ switch ( $action )
 		if ( preg_match ( '/[^a-zA-Z0-9_]/', $username ))
 		{
 			print "The username can only contain characters in the charset '[a-zA-Z0-9_]'\n";
-			return 1;
+			return '';
 		}
 
-		if ( preg_match ( '/[^a-zA-Z0-9]/', $password ) || strlen ( $password ) != 32 )
+		if ( preg_match ( '/[^a-fA-F0-9]/', $password ) || strlen ( $password ) != 32 )
 		{
 			print "The provided password is not a valid hash\n";
-			return 1;
+			return '';
 		}
 
 		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
 		{
 			print "Unable to open the users XML file\n";
-			return 1;
+			return '';
 		}
 
 		for ( $i = 0; $i < count ( $xml->user ); $i++ )
@@ -44,7 +46,7 @@ switch ( $action )
 			if ( !strcasecmp ( $xml->user[$i]['name'], $username ))
 			{
 				print "The specified user already exists\n";
-				return 1;
+				return '';
 			}
 		}
 
@@ -56,13 +58,22 @@ switch ( $action )
 		if ( !( $fp = fopen ( 'userlist.php', 'w' )))
 		{
 			print "Unable to add the specified user, unknown error\n";
-			return 1;
+			return '';
 		}
 
 		fwrite ( $fp, '<?php'."\n\n".'$xmlcontent = <<<XML'."\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
 		fclose ( $fp );
 
-		print 'User "'.$username.' successfully added, home directory set to "/home/'.$username."\"\n";
+		$perms = array();
+		$perms['owner'] = $username;
+		$perms['can_read'] = $username;
+		$perms['can_write'] = $username;
+
+		$GLOBALS['sudo_cmd'] = true;
+		print __mkdir ( '/home/'.$username, $perms )."<br/>\n";
+		$GLOBALS['sudo_cmd'] = false;
+
+		print 'User "'.$username.'" successfully added, home directory set to "/home/'.$username."\"\n";
 		break;
 
 	case 'login':
@@ -77,13 +88,13 @@ switch ( $action )
 		if ( preg_match ( '/[^a-zA-Z0-9_]/', $username ))
 		{
 			print "The username can only contain characters in the charset '[a-zA-Z0-9_]'\n";
-			return 1;
+			return '';
 		}
 
 		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
 		{
 			print "Unable to open the users XML file\n";
-			return 1;
+			return '';
 		}
 
 		for ( $i = 0; $i < count ( $xml->user ) && !$found; $i++ )
@@ -93,7 +104,7 @@ switch ( $action )
 				if ( strcasecmp ( $xml->user[$i]['pass'], $password ))
 				{
 					print "Wrong password provided for user '$username'\n";
-					return 1;
+					return '';
 				} else {
 					$auth = md5 ( $xml->user[$i]['name'] . $xml->user[$i]['pass'] );
 					setcookie ( 'username', $xml->user[$i]['name'], 0, "/" );
@@ -106,7 +117,7 @@ switch ( $action )
 		}
 
 		print "Username not found: '$username'\n";
-		return 1;
+		return '';
 		break;
 
 	case 'getuser':
@@ -129,13 +140,13 @@ switch ( $action )
 		if ( $cur_user != 'root' && $cur_user != $user )
 		{
 			print "You cannot change the password for the user '$user'\n";
-			return 1;
+			return '';
 		}
 
 		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
 		{
 			print "Unable to open the users XML file\n";
-			return 1;
+			return '';
 		}
 
 		for ( $i = 0; $i < count ( $xml->user ); $i++ )
@@ -151,7 +162,7 @@ switch ( $action )
 					if ( $xml->user[$i]['pass'] != $old_pass )
 					{
 						print "The provided current password is wrong\n";
-						return 1;
+						return '';
 					}
 				}
 
@@ -160,7 +171,7 @@ switch ( $action )
 				if ( !( $fp = fopen ( 'userlist.php', 'w' )))
 				{
 					print "Unable to change the password for the specified user, unknown error\n";
-					return 1;
+					return '';
 				}
 
 				fwrite ( $fp, "<?php\n\n\$xmlcontent = <<<XML\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
@@ -183,7 +194,28 @@ switch ( $action )
 
 		print getPerms ( $res );
 		break;
+
+	case 'mkdir':
+		$dir = $_REQUEST['dir'];
+
+		if ( !$dir )
+		{
+			return false;
+		}
+
+		print __mkdir ( $dir, null );
+		break;
+
+	case 'rmdir':
+		$dir = $_REQUEST['dir'];
+
+		if ( !$dir )
+		{
+			return false;
+		}
+
+		print __rmdir ( $dir );
+		break;
 }
 
 ?>
-

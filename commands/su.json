@@ -22,17 +22,21 @@
 
 		if ( shell.__first_cmd )
 		{
-			shell.cmdOut.innerHTML = '<br/>';
+			shell.cmdOut.innerHTML = '<br/>Password: <input type="password" ' +
+				'name="password" class="password" ' +
+				'onkeyup="shell.getPassword ( event )">' +
+				'<br/>';
+
 			shell.__first_cmd = false;
+		} else {
+			shell.cmdOut.innerHTML = 'Password: <input type="password" ' +
+				'name="password" class="password" ' +
+				'onkeyup="shell.getPassword ( event )">' +
+				'<br/>';
 		}
 
 		shell.getPassword = this.getPassword;
 		shell.newuser = arg;
-
-		shell.cmdOut.innerHTML += 'Password: <input type="password" ' +
-			'name="password" class="password" ' +
-			'onkeyup="shell.getPassword ( event )">' +
-			'<br/>';
 
 		shell.auto_prompt_focus = false;
 		shell.auto_prompt_refresh = false;

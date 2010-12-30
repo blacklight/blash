@@ -1,0 +1,89 @@
+{
+	"name" : "mkdir",
+
+	"info" :  {
+		"syntax" : "mkdir &lt;directory name&gt;",
+		"brief" : "Create a new directory",
+	},
+
+	"action" : function ( arg )
+	{
+		if ( !arg || arg.length == 0 )
+		{
+			return "mkdir: Parameter expected<br/>\n";
+		}
+
+		shell.auto_prompt_focus = false;
+		shell.auto_prompt_refresh = false;
+		arg = shell.expandPath ( arg );
+
+		var users_php = window.location.href;
+		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		params = 'action=mkdir&dir=' + escape ( arg );
+
+		var http = new XMLHttpRequest();
+		http.open ( "POST", users_php, true );
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader("Content-length", params.length);
+		http.setRequestHeader("Connection", "close");
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				if ( http.responseText.length > 0 )
+				{
+					shell.cmdOut.innerHTML = http.responseText;
+				} else {
+					var files_config = window.location.href;
+					files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+					var http2 = new XMLHttpRequest();
+					http2.open ( "GET", files_config, true );
+
+					http2.onreadystatechange = function ()
+					{
+						if ( http2.readyState == 4 && http2.status == 200 )
+						{
+							shell.files = eval ( '(' + http2.responseText + ')' );
+
+							// Remove duplicates
+							var tmp = new Array();
+
+							for ( var i in shell.files )
+							{
+								var contains = false;
+
+								for ( var j=0; j < tmp.length && !contains; j++ )
+								{
+									if ( shell.files[i].path == tmp[j].path )
+									{
+										contains = true;
+									}
+								}
+
+								if ( !contains )
+								{
+									tmp.push ( shell.files[i] );
+								}
+							}
+
+							shell.files = tmp;
+						}
+					}
+
+					http2.send ( null );
+					shell.cmdOut.innerHTML = '';
+				}
+
+				shell.refreshPrompt ( false, false );
+				shell.auto_prompt_focus = true;
+				shell.auto_prompt_refresh = true;
+			}
+		}
+
+		http.send ( params );
+		shell.cmdOut.innerHTML = '';
+	}
+}
+

@@ -29,11 +29,11 @@ input.password
 
 div#blashWindow
 {
-	width : 800px;
-	height : 400px;
+	/* width : 800px; */
+	/* height : 400px; */
 	margin : auto;
-	padding : 10px;
-	border : 1px solid #888;
+	/* padding : 10px; */
+	/* border : 1px solid #888; */
 	overflow : auto;
 	tabindex : -1;
 }

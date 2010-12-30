@@ -39,6 +39,12 @@
 			{
 				shell.cmdOut.innerHTML = 'The passwords do not match';
 			} else {
+				if ( shell.newuser.match ( /[^0-9a-zA-Z_]/ ))
+				{
+					shell.cmdOut.innerHTML = 'The username contains invalid characters, out of the charset [0-9a-zA-Z_]';
+					return false;
+				}
+
 				var users_php = window.location.href;
 				users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
 				params = 'action=add&user=' + escape ( shell.newuser ) + '&pass=' + md5 ( password.value );
@@ -60,6 +66,8 @@
 							shell.cmdOut.innerHTML = '';
 						}
 
+						shell.auto_prompt_focus = true;
+						shell.auto_prompt_refresh = true;
 						shell.refreshPrompt ( false, false );
 					}
 				}
@@ -67,10 +75,6 @@
 				http.send ( params );
 				shell.cmdOut.innerHTML = '';
 			}
-
-			shell.auto_prompt_focus = true;
-			shell.auto_prompt_refresh = true;
-			shell.refreshPrompt ( false, false );
 		}
 	},
 
@@ -89,23 +93,35 @@
 			return "Usage: " + this.name + " &lt;username&gt;<br/>\n";
 		}
 
+		if ( arg.match ( /[^0-9a-zA-Z_]/ ))
+		{
+			return "Invalid character(s) in the username, range [0-9a-zA-Z_] allowed<br/>\n";
+		}
+
 		shell.keyPassword = this.keyPassword;
 		shell.keyRepeatPassword = this.keyRepeatPassword;
 		shell.newuser = arg;
 
 		if ( shell.__first_cmd )
 		{
-			shell.cmdOut.innerHTML = '<br/>';
-			shell.__first_cmd = false;
-		}
+			shell.cmdOut.innerHTML = '<br/>Password: <input type="password" ' +
+				'name="password" class="password" ' +
+				'onkeyup="shell.keyPassword ( event )">' +
+				'<br/><span id="repeatPasswordText" style="visibility: hidden">' +
+				'Repeat password: </span>' +
+				'<input type="password" name="repeatPassword" class="password" ' +
+				'style="visibility: hidden" onkeyup="shell.keyRepeatPassword ( event )"><br/>';
 
-		shell.cmdOut.innerHTML += 'Password: <input type="password" ' +
-			'name="password" class="password" ' +
-			'onkeyup="shell.keyPassword ( event )">' +
-			'<br/><span id="repeatPasswordText" style="visibility: hidden">' +
-			'Repeat password: </span>' +
-			'<input type="password" name="repeatPassword" class="password" ' +
-			'style="visibility: hidden" onkeyup="shell.keyRepeatPassword ( event )"><br/>';
+			shell.__first_cmd = false;
+		} else {
+			shell.cmdOut.innerHTML = 'Password: <input type="password" ' +
+				'name="password" class="password" ' +
+				'onkeyup="shell.keyPassword ( event )">' +
+				'<br/><span id="repeatPasswordText" style="visibility: hidden">' +
+				'Repeat password: </span>' +
+				'<input type="password" name="repeatPassword" class="password" ' +
+				'style="visibility: hidden" onkeyup="shell.keyRepeatPassword ( event )"><br/>';
+		}
 
 		shell.auto_prompt_focus = false;
 		shell.auto_prompt_refresh = false;
