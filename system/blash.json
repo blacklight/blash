@@ -66,8 +66,10 @@
 		"mkdir",
 		"passwd",
 		"pwd",
+		"rm",
 		"rmdir",
 		"su",
+		"touch",
 		"useradd",
 		"whoami"
 	]

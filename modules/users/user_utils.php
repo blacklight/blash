@@ -305,6 +305,162 @@ function __json_encode( $data ) {
 	return $json;
 } 
 
+function __touch ( $file, $own_perms )
+{
+	include "../../system/files_json.php";
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'touch: Error: Empty JSON file container';
+	}
+
+	if ( preg_match ( "@[^0-9a-zA-Z_\./\ ]@", $file ))
+	{
+		return "touch: Invalid character(s) for a file name out of range '[0-9a-zA-Z_./ ]'\n";
+	}
+
+	$has_perms = false;
+
+	if ( $own_perms )
+	{
+		if ( is_array ( $own_perms ))
+		{
+			$has_perms = true;
+		}
+	}
+
+	$user = getUser();
+	$json = json_decode ( $files_json, true );
+	$parent_dir = preg_replace ( '@/[^/]+$@', '', $file );
+	$parent_dir_found = false;
+
+	if ( preg_match ( "/^\s*$/", $parent_dir ))
+	{
+		$parent_dir = '/';
+	}
+
+	for ( $i=0; $i < count ( $json ); $i++ )
+	{
+		$path = $json[$i]['path'];
+
+		if ( !$path || strlen ( $path ) == 0 )
+		{
+			continue;
+		}
+
+		if ( $path == $parent_dir )
+		{
+			$parent_dir_found = true;
+			$perms = getPerms ( $parent_dir );
+			$perms = json_decode ( $perms, true );
+
+			if ( $perms['write'] == false )
+			{
+				$file = str_replace ( '<', '&lt;', $file );
+				$file = str_replace ( '>', '&gt;', $file );
+				return "touch: Could not touch $file: Permission denied\n";
+			}
+		}
+
+		if ( $path == $file )
+		{
+			$file = str_replace ( '<', '&lt;', $file );
+			$file = str_replace ( '>', '&gt;', $file );
+			return "touch: Could not touch $file: The file already exists\n";
+		}
+	}
+
+	if ( !$parent_dir_found )
+	{
+		$file = str_replace ( '<', '&lt;', $file );
+		$file = str_replace ( '>', '&gt;', $file );
+		return "touch: Could not touch $file: Parent directory not found\n";
+	}
+
+	$newfile = array();
+	$newfile['path'] = "$file";
+	$newfile['type'] = 'file';
+	$newfile['owner'] = ($has_perms) ? $own_perms['owner'] : "$user";
+	$newfile['can_read'] = ($has_perms) ? $own_perms['can_read'] : '@all';
+	$newfile['can_write'] = ($has_perms) ? $own_perms['can_write'] : "$user";
+	$newfile['content'] = "";
+
+	array_push ( $json, $newfile );
+
+	if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+	{
+		return "touch: Unable to write on directories file\n";
+	}
+
+	fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+	fclose ( $fp );
+	return "";
+}
+
+function __rm ( $file )
+{
+	include "../../system/files_json.php";
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'rm: Error: Empty JSON file container';
+	}
+
+	$user = getUser();
+	$json = json_decode ( $files_json, true );
+	$file_found = false;
+
+	for ( $i=0; $i < count ( $json ) && !$file_found; $i++ )
+	{
+		$path = $json[$i]['path'];
+
+		if ( !$path || strlen ( $path ) == 0 )
+		{
+			continue;
+		}
+
+		if ( $path == $file )
+		{
+			if ( $json[$i]['type'] != 'file' )
+			{
+				$file = str_replace ( '<', '&lt;', $file );
+				$file = str_replace ( '>', '&gt;', $file );
+				return "rm: Could not remove file $file: It is not a regular file\n";
+			} else {
+				$file_found = true;
+				$perms = getPerms ( $path );
+				$perms = json_decode ( $perms, true );
+
+				if ( $perms['write'] == false )
+				{
+					$path = str_replace ( '<', '&lt;', $path );
+					$path = str_replace ( '>', '&gt;', $path );
+					return "rm: Could not remove file $path: Permission denied\n";
+				} else {
+					array_splice ( $json, $i, 1 );
+					$i--;
+				}
+			}
+		}
+	}
+
+	if ( !$file_found )
+	{
+		$file = str_replace ( '<', '&lt;', $file );
+		$file = str_replace ( '>', '&gt;', $file );
+		return "rm: Could not remove $file: File not found\n";
+	}
+
+	if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+	{
+		return "rm: Unable to write on directories file\n";
+	}
+
+	fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+	fclose ( $fp );
+	return "";
+}
+
 function __mkdir ( $dir, $own_perms )
 {
 	include "../../system/files_json.php";
@@ -402,7 +558,7 @@ function __rmdir ( $dir )
 
 	if ( !$files_json || strlen ( $files_json ) == 0 )
 	{
-		return 'mkdir: Error: Empty JSON file container';
+		return 'rmdir: Error: Empty JSON file container';
 	}
 
 	$user = getUser();
@@ -450,12 +606,12 @@ function __rmdir ( $dir )
 	{
 		$dir = str_replace ( '<', '&lt;', $dir );
 		$dir = str_replace ( '>', '&gt;', $dir );
-		return "mkdir: Could not remove directory $dir: File not found\n";
+		return "rmdir: Could not remove directory $dir: File not found\n";
 	}
 
 	if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
 	{
-		return "mkdir: Unable to write on directories file\n";
+		return "rmdir: Unable to write on directories file\n";
 	}
 
 	fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");

@@ -219,6 +219,28 @@ switch ( $action )
 		print __rmdir ( $dir );
 		break;
 
+	case 'touch':
+		$file = $_REQUEST['file'];
+
+		if ( !$file )
+		{
+			return false;
+		}
+
+		print __touch ( $file, null );
+		break;
+
+	case 'rm':
+		$file = $_REQUEST['file'];
+
+		if ( !$file )
+		{
+			return false;
+		}
+
+		print __rm ( $file );
+		break;
+
 	default :
 		print "Unallowed action\n";
 		break;
