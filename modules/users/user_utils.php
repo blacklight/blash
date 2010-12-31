@@ -34,6 +34,38 @@ function getUser ()
 	return "guest";
 }
 
+function getHome ()
+{
+	include 'userlist.php';
+
+	if ( isset ( $_COOKIE['username'] ) && isset ( $_COOKIE['auth'] ))
+	{
+		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+		{
+			return "Unable to open the users XML file\n";
+		}
+
+		for ( $i = 0; $i < count ( $xml->user ); $i++ )
+		{
+			if ( !strcasecmp ( $xml->user[$i]['name'], $_COOKIE['username'] ))
+			{
+				$auth = md5 ( $xml->user[$i]['name'] . $xml->user[$i]['pass'] );
+
+				if ( !strcasecmp ( $auth, $_COOKIE['auth'] ))
+				{
+					return $xml->user[$i]['home'];
+				} else {
+					return '/';
+				}
+			}
+		}
+
+		return '/';
+	}
+
+	return '/';
+}
+
 function getPerms ( $resource )
 {
 	include "../../system/files_json.php";
@@ -377,7 +409,7 @@ function __rmdir ( $dir )
 	$json = json_decode ( $files_json, true );
 	$dir_found = false;
 
-	for ( $i=0; $i < count ( $json ) && !$dir_found; $i++ )
+	for ( $i=0; $i < count ( $json ); $i++ )
 	{
 		$path = $json[$i]['path'];
 
@@ -388,17 +420,28 @@ function __rmdir ( $dir )
 
 		if ( $path == $dir )
 		{
+			if ( $json[$i]['type'] != 'directory' )
+			{
+				$dir = str_replace ( '<', '&lt;', $dir );
+				$dir = str_replace ( '>', '&gt;', $dir );
+				return "rmdir: Could not remove directory $dir: It is not a directory\n";
+			}
+		}
+
+		if ( preg_match ( "@^".$dir."(/+.*)?@", $path ))
+		{
 			$dir_found = true;
-			$perms = getPerms ( $dir );
+			$perms = getPerms ( $path );
 			$perms = json_decode ( $perms, true );
 
 			if ( $perms['write'] == false )
 			{
-				$dir = str_replace ( '<', '&lt;', $dir );
-				$dir = str_replace ( '>', '&gt;', $dir );
-				return "rmdir: Could not remove directory $dir: Permission denied\n";
+				$path = str_replace ( '<', '&lt;', $path );
+				$path = str_replace ( '>', '&gt;', $path );
+				return "rmdir: Could not remove directory $path Permission denied\n";
 			} else {
 				array_splice ( $json, $i, 1 );
+				$i--;
 			}
 		}
 	}

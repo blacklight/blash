@@ -117,12 +117,14 @@ switch ( $action )
 		}
 
 		print "Username not found: '$username'\n";
-		return '';
 		break;
 
 	case 'getuser':
 		print getUser();
-		return 0;
+		break;
+
+	case 'gethome':
+		print getHome();
 		break;
 
 	case 'logout':
@@ -216,6 +218,12 @@ switch ( $action )
 
 		print __rmdir ( $dir );
 		break;
+
+	default :
+		print "Unallowed action\n";
+		break;
 }
+
+return "";
 
 ?>

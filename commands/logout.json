@@ -80,6 +80,7 @@
 		}
 
 		http.send ( params );
+		shell.path = shell.json.basepath;
 		return out;
 	},
 }

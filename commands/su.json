@@ -112,19 +112,49 @@
 						}
 
 						http2.send ( null );
-					}
 
-					shell.cmdOut.innerHTML = http.responseText;
-					shell.refreshPrompt ( false, false );
+						var xml2 = new XMLHttpRequest();
+						xml2.open ( "POST", users_php, true );
+						xml2.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
+						xml2.setRequestHeader ( "Content-length", params.length );
+						xml2.setRequestHeader ( "Connection", "close" );
+						params = 'action=gethome';
+
+						xml2.onreadystatechange = function ()
+						{
+							if ( xml2.readyState == 4 && xml2.status == 200 )
+							{
+								if ( xml2.responseText.length > 0 )
+								{
+									shell.home = xml2.responseText;
+									shell.path = shell.home;
+								} else {
+									shell.user = shell.json.user;
+								}
+
+								shell.auto_prompt_focus = true;
+								shell.auto_prompt_refresh = true;
+								shell.refreshPrompt ( false, false );
+							}
+						}
+
+						xml2.send ( params );
+						shell.cmdOut.innerHTML = http.responseText;
+					} else {
+						shell.cmdOut.innerHTML = http.responseText;
+						shell.auto_prompt_focus = true;
+						shell.auto_prompt_refresh = true;
+						shell.refreshPrompt ( false, false );
+					}
 				}
 			}
 
 			http.send ( params );
 
 			shell.cmdOut.innerHTML = '';
-			shell.auto_prompt_focus = true;
-			shell.auto_prompt_refresh = true;
-			shell.refreshPrompt ( false, false );
+			// shell.auto_prompt_focus = true;
+			// shell.auto_prompt_refresh = true;
+			// shell.refreshPrompt ( false, false );
 		}
 	},
 }

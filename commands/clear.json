@@ -8,9 +8,7 @@
 
 	"action" : function ( arg )
 	{
-		var out = '';
-		shell.refreshPrompt ( true );
-		return out;
+		shell.refreshPrompt ( true, true );
 	},
 }
 

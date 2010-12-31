@@ -16,6 +16,9 @@ function blash ()
 	/** Current user */
 	this.user = '';
 
+	/** Home directory */
+	this.home = '/';
+
 	/** Object containing the parsed JSON configuration object */
 	this.json = {};
 
@@ -116,6 +119,29 @@ function blash ()
 			}
 
 			xml.send ( params );
+
+			var xml2 = new XMLHttpRequest();
+			xml2.open ( "POST", users_php, true );
+			xml2.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
+			xml2.setRequestHeader ( "Content-length", params.length );
+			xml2.setRequestHeader ( "Connection", "close" );
+			params = 'action=gethome';
+
+			xml2.onreadystatechange = function ()
+			{
+				if ( xml2.readyState == 4 && xml2.status == 200 )
+				{
+					if ( xml2.responseText.length > 0 )
+					{
+						shell.home = xml2.responseText;
+						shell.path = shell.home;
+					} else {
+						shell.user = shell.json.user;
+					}
+				}
+			}
+
+			xml2.send ( params );
 		}
 	}
 
@@ -286,7 +312,7 @@ function blash ()
 			return false;
 		} else if ( key == 76 && evt.ctrlKey ) {
 			// CTRL-l clears the screen
-			this.refreshPrompt ( true );
+			this.refreshPrompt ( true, false );
 			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
 			if ( this.prompt.value.length != 0 && ( key != 67 || !evt.ctrlKey ))
@@ -602,12 +628,10 @@ function blash ()
 		
 		if ( !clearOut )
 		{
-			if ( out.length > 0 )
-			{
-				var outDiv = document.createElement ( 'span' );
-				outDiv.innerHTML = '<br/>' + out + '<br/>' + text;
-				this.window.appendChild ( outDiv );
-			}
+			var outDiv = document.createElement ( 'span' );
+			outDiv.innerHTML = ((value.length > 0) ? value : '') +
+				'<br/>' + ((out.length > 0) ? (out + '<br/>') : '') + text;
+			this.window.appendChild ( outDiv );
 		}
 
 		this.prompt = document.createElement ( 'input' );
