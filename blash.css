@@ -82,3 +82,50 @@ span.match
 	font-weight : bold;
 }
 
+div.editor_container
+{
+	width : 100%;
+	height : 100%;
+	overflow : hidden;
+}
+
+textarea.editor_window
+{
+	border : 0px;
+	width : 100%;
+	height : 93%;
+	background-color : black;
+	color : #888;
+	font-family : Terminus, courier, monospace, fixed;
+	font-size : 13px;
+}
+
+.editor_status
+{
+	width : 100%;
+	background-color : black;
+	color : #888;
+	font-family : Terminus, courier, monospace, fixed;
+	font-size : 13px;
+	margin-bottom : 0;
+}
+
+.editor_head
+{
+	width : 100%;
+	background-color : #222;
+	color : #888;
+	font-family : Terminus, courier, monospace, fixed;
+	font-size : 13px;
+	margin-bottom : 0;
+}
+
+input.editor_status_input
+{
+	background-color : black;
+	color : #888;
+	font-family : Terminus, courier, monospace, fixed;
+	font-size : 13px;
+	border : 0;
+}
+

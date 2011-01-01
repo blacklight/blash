@@ -32,6 +32,7 @@ $files_json = <<<JSON
 , {"path": "/irc", "type": "file", "content": "IRC channel at #thegame@irc.randomstuff.com"}
 , {"path": "/root", "type": "directory", "can_read": "root", "can_write": "root"}
 , {"path": "/home/blacklight", "type": "directory", "owner": "blacklight", "can_read": "blacklight", "can_write": "blacklight"}
+, {"path": "/home/blacklight/lol", "type": "file", "owner": "blacklight", "can_read": "@all", "can_write": "blacklight", "content": "this is a test<br/>lol lol asd 'lol' &lt;asd&gt; 'asd'"}
 ]
 
 JSON;

@@ -64,6 +64,7 @@
 		"ls",
 		"man",
 		"mkdir",
+		"nano",
 		"passwd",
 		"pwd",
 		"rm",

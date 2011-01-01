@@ -1,0 +1,373 @@
+{
+	"name" : "nano",
+
+	"info" :  {
+		"syntax" : "nano &lt;file name&gt;",
+		"brief" : "Edit the content of a new or existing file",
+	},
+
+	"action" : function ( arg )
+	{
+		var file = null;
+		var parent_dir = null;
+		var newfile = false;
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "nano: Parameter expected<br/>\n";
+		}
+
+		arg = shell.expandPath ( arg );
+
+		if (!( parent_dir = shell.getParentDirectory ( arg )))
+		{
+			return "nano: Parent directory not found<br/>\n";
+		}
+
+		if ( !( file = shell.getFile ( arg )))
+		{
+			newfile = true;
+		}
+
+		if ( !newfile )
+		{
+			if ( file['type'] == 'directory' )
+			{
+				arg = arg.replace ( /</g, '&lt;' );
+				arg = arg.replace ( />/g, '&gt;' );
+				return "nano: Cannot edit '" + arg + "': Is a directory<br/>\n";
+			}
+		}
+
+		var users_php = window.location.href;
+		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		params = 'action=getperms&resource=' +
+			( newfile ? escape ( parent_dir['path'] ) : escape ( arg ));
+
+		var http = new XMLHttpRequest();
+		http.open ( "POST", users_php, true );
+		http.setRequestHeader ("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader ("Content-length", params.length);
+		http.setRequestHeader ("Connection", "close");
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				if ( http.responseText.length > 0 )
+				{
+					shell.perms = eval ( '(' + http.responseText + ')' );
+				}
+			}
+		}
+
+		http.send ( params );
+
+		fname = arg.replace ( /</g, '&lt;' );
+		fname = fname.replace ( />/g, '&gt;' );
+		
+		shell.fname = arg;
+		shell.editorkeypressed = this.editorkeypressed;
+		shell.confirmkey = this.confirmkey;
+		shell.bufferSave = this.bufferSave;
+
+		shell.default_editor_status = "[<b>^X</b> Exit] [<b>^O</b> WriteOut] [<b>^W</b> Where Is]";
+
+		if ( shell.perms )
+		{
+			if ( shell.perms.write == false )
+			{
+				shell.default_editor_status += ' [read-only]';
+			}
+		}
+
+		shell.default_editor_head = "<table class=\"editor_head\" border=\"0\" width=\"100%\"><tr>" +
+			"<td align=\"left\">blash nano</td><td align=\"right\">File: " + fname + "</td></tr></table>";
+
+		shell.auto_prompt_focus = false;
+		shell.auto_prompt_refresh = false;
+		shell.window.removeChild ( shell.prompt );
+		shell.window.removeChild ( shell.cmdOut );
+		shell.window.innerHTML = '';
+
+		var container = document.createElement ( 'div' );
+		container.setAttribute ( 'class', 'editor_container' );
+		container.setAttribute ( 'id', 'editor_container' );
+		shell.window.appendChild ( container );
+		shell.editor_container = container;
+
+		var head = document.createElement ( 'span' );
+		head.setAttribute ( 'class', 'editor_head' );
+		head.setAttribute ( 'id', 'editor_head' );
+		head.innerHTML = shell.default_editor_head;
+		container.appendChild ( head );
+		shell.editor_head = document.getElementById ( 'editor_head' );
+
+		var editor = document.createElement ( 'textarea' );
+		editor.setAttribute ( 'class', 'editor_window' );
+		editor.setAttribute ( 'id', 'editor_window' );
+		editor.setAttribute ( 'onkeypress', 'shell.editorkeypressed ( event )' );
+		editor.innerHTML = '';
+
+		has_content = false;
+
+		if ( file )
+		{
+			if ( file.content )
+			{
+				if ( file.content.length > 0 )
+				{
+					var content = file.content.replace ( /<br\/?>/g, "\n" );
+					content = content.replace ( '&lt;', '<' );
+					content = content.replace ( '&gt;', '>' );
+					editor.value = content;
+					has_content = true;
+				}
+			}
+		}
+
+		if ( !has_content )
+		{
+			editor.value = '';
+			shell.originalContent = '';
+		} else {
+			shell.originalContent = file.content;
+		}
+
+		container.appendChild ( editor );
+		editor.focus();
+		shell.file_changed = false;
+		shell.editor_window = document.getElementById ( 'editor_window' );
+
+		var status = document.createElement ( 'span' );
+		status.setAttribute ( 'class', 'editor_status' );
+		status.setAttribute ( 'id', 'editor_status' );
+		status.innerHTML = shell.default_editor_status;
+
+		container.appendChild ( status );
+		shell.editor_status = document.getElementById ( 'editor_status' );
+
+		return '';
+	},
+
+	"editorkeypressed" : function ( e )
+	{
+		var evt = ( window.event ) ? window.event : e;
+		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
+		key = String.fromCharCode ( key );
+
+		if ( !shell.file_changed )
+		{
+			if ( shell.originalContent != shell.editor_window.value )
+			{
+				if ( shell.perms )
+				{
+					if ( shell.perms.write == false )
+					{
+						shell.default_editor_status += ' [read-only]';
+						shell.editor_status.innerHTML += ' [read-only]';
+					}
+				}
+
+				shell.editor_status.innerHTML += ' [modified]';
+				shell.file_changed = true;
+			}
+		}
+
+		if (( key == 'x' || key == 'X' ) && evt.ctrlKey )
+		{
+			evt.preventDefault();
+
+			if ( shell.file_changed )
+			{
+				var can_write = false;
+
+				if ( shell.perms )
+				{
+					if ( shell.perms.write == true )
+					{
+						can_write = true;
+					}
+				}
+
+				if ( can_write )
+				{
+					shell.editor_status.innerHTML = 'Save modified buffer (ANSWERING "No" WILL DESTROY CHANGES) ? ' +
+						'(Yes/No/Cancel) ';
+				} else {
+					shell.editor_status.innerHTML = 'You modified a read-only file. If you exit, the changes will ' +
+						'be lost. Are you sure you cant to exit? (Yes/No) ';
+				}
+
+				shell.editor_status.innerHTML += '<input type="text" class="editor_status_input" id="editor_status_input" '+
+						'onkeydown="shell.confirmkey ( event )"/>';
+
+				document.getElementById ( 'editor_status_input' ).focus();
+			} else {
+				shell.auto_prompt_focus = true;
+				shell.auto_prompt_refresh = true;
+				shell.refreshPrompt ( true );
+			}
+		} else if (( key == 'o' || key == 'O' ) && evt.ctrlKey ) {
+			evt.preventDefault();
+
+			if ( shell.file_changed )
+			{
+				var can_write = false;
+
+				if ( shell.perms )
+				{
+					if ( shell.perms.write == true )
+					{
+						can_write = true;
+					}
+				}
+
+				if ( can_write )
+				{
+					shell.bufferSave();
+					shell.file_changed = false;
+					shell.editor_status.innerHTML = shell.default_editor_status;
+				}
+			}
+		}
+	},
+
+	"confirmkey" : function ( e )
+	{
+		var can_write = false;
+		var evt = ( window.event ) ? window.event : e;
+		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
+		key = String.fromCharCode ( key );
+
+		if ( shell.perms )
+		{
+			if ( shell.perms.write == true )
+			{
+				can_write = true;
+			}
+		}
+
+		if ( can_write )
+		{
+			switch ( key )
+			{
+				case 'c':
+				case 'C':
+					evt.preventDefault();
+					shell.editor_status.innerHTML = shell.default_editor_status + ' [modified]';
+					shell.editor_window.focus();
+					break;
+
+				case 'y':
+				case 'Y':
+					shell.bufferSave();
+
+				case 'n':
+				case 'N':
+					evt.preventDefault();
+					shell.auto_prompt_focus = true;
+					shell.auto_prompt_refresh = true;
+					shell.refreshPrompt ( true );
+					break;
+
+				default :
+					evt.preventDefault();
+					document.getElementById ( 'editor_status_input' ).value = '';
+					break;
+			}
+		} else {
+			switch ( key )
+			{
+				case 'n':
+				case 'N':
+					evt.preventDefault();
+					shell.editor_status.innerHTML = shell.default_editor_status + ' [modified]';
+					shell.editor_window.focus();
+					break;
+
+				case 'y':
+				case 'Y':
+					evt.preventDefault();
+					shell.auto_prompt_focus = true;
+					shell.auto_prompt_refresh = true;
+					shell.refreshPrompt ( true );
+					break;
+
+				default :
+					evt.preventDefault();
+					document.getElementById ( 'editor_status_input' ).value = '';
+					break;
+			}
+		}
+	},
+
+	"bufferSave" : function ()
+	{
+		var users_php = window.location.href;
+		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		params = 'action=set_content&file=' + escape ( shell.fname ) + '&content=' + escape ( document.getElementById ( 'editor_window' ).value );
+
+		var http = new XMLHttpRequest();
+		http.open ( "POST", users_php, true );
+		http.setRequestHeader ("Content-type", "application/x-www-form-urlencoded");
+		http.setRequestHeader ("Content-length", params.length);
+		http.setRequestHeader ("Connection", "close");
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				if ( http.responseText.length > 0 )
+				{
+					shell.editor_status.innerHTML = http.responseText;
+					setTimeout ( 'shell.editor_status.innerHTML = shell.default_editor_status', 5000 );
+
+					var files_config = window.location.href;
+					files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+					var http2 = new XMLHttpRequest();
+					http2.open ( "GET", files_config, true );
+
+					http2.onreadystatechange = function ()
+					{
+						if ( http2.readyState == 4 && http2.status == 200 )
+						{
+							shell.files = eval ( '(' + http2.responseText + ')' );
+
+							// Remove duplicates
+							var tmp = new Array();
+
+							for ( var i in shell.files )
+							{
+								var contains = false;
+
+								for ( var j=0; j < tmp.length && !contains; j++ )
+								{
+									if ( shell.files[i].path == tmp[j].path )
+									{
+										contains = true;
+									}
+								}
+
+								if ( !contains )
+								{
+									tmp.push ( shell.files[i] );
+								}
+							}
+
+							shell.files = tmp;
+						}
+					}
+
+					http2.send ( null );
+				}
+			}
+		}
+
+		http.send ( params );
+		shell.originalContent = shell.editor_window.value;
+		shell.file_changed = false;
+	}
+}
+

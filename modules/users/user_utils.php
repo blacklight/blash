@@ -305,6 +305,94 @@ function __json_encode( $data ) {
 	return $json;
 } 
 
+function set_content ( $file, $content )
+{
+	$perms = json_decode ( getPerms ( $file ), true );
+	$can_write = true;
+
+	if ( !$perms['write'] )
+	{
+		$can_write = false;
+
+		if ( $perms['message'] )
+		{
+			if ( !strcasecmp ( $perms['message'], "Resource not found" ))
+			{
+				$parent = preg_replace ( "@/[^/]+$@", '', $file );
+				$perms = json_decode ( getPerms ( $parent ), true );
+
+				if ( !$perms['write'] )
+				{
+					if ( $perms['message'] )
+					{
+						if ( !strcasecmp ( $perms['message'], "Resource not found" ))
+						{
+							return "Cannot save the file: Parent directory not found";
+						} else {
+							return $perms['message'];
+						}
+					} else {
+						return "Cannot write to the file: Permission denied";
+					}
+				} else {
+					$can_write = true;
+				}
+			} else {
+				return $perms['message'];
+			}
+		} else {
+			return "Cannot write to the file: Permission denied";
+		}
+	}
+
+	$resp = __touch ( $file, null );
+	include "../../system/files_json.php";
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	$json = json_decode ( $files_json, true );
+
+	if ( !$json )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	for ( $i=0; $i < count ( $json ); $i++ )
+	{
+		$path = $json[$i]['path'];
+
+		if ( !$path || strlen ( $path ) == 0 )
+		{
+			continue;
+		}
+
+		if ( $path == $file )
+		{
+			$content = str_replace ( '<', '&lt;', $content );
+			$content = str_replace ( '>', '&gt;', $content );
+			$content = str_replace ( "\'", "'", $content );
+			$content = str_replace ( '"', "'", $content );
+			$content = str_replace ( '\\', '', $content );
+			$content = str_replace ( "\r", '', $content );
+			$content = str_replace ( "\n", '<br/>', $content );
+
+			$json[$i]['content'] = $content;
+
+			if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+			{
+				return "Unable to write on directories file\n";
+			}
+
+			fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+			fclose ( $fp );
+			return "File successfully saved";
+		}
+	}
+}
+
 function __touch ( $file, $own_perms )
 {
 	include "../../system/files_json.php";

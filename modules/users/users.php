@@ -241,6 +241,18 @@ switch ( $action )
 		print __rm ( $file );
 		break;
 
+	case 'set_content':
+		$file = $_REQUEST['file'];
+		$content = $_REQUEST['content'];
+
+		if ( !( $file && $content ))
+		{
+			return false;
+		}
+
+		print set_content ( $file, $content );
+		break;
+
 	default :
 		print "Unallowed action\n";
 		break;

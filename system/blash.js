@@ -250,6 +250,8 @@ function blash ()
 
 		if ( key == 68 && evt.ctrlKey )
 		{
+			evt.preventDefault();
+
 			/* CTRL-d -> logout */
 			for ( i=0; i < this.commands.length; i++ )
 			{
@@ -312,6 +314,7 @@ function blash ()
 			return false;
 		} else if ( key == 76 && evt.ctrlKey ) {
 			// CTRL-l clears the screen
+			evt.preventDefault();
 			this.refreshPrompt ( true, false );
 			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
@@ -435,6 +438,7 @@ function blash ()
 			this.prompt.focus();
 		} else if ( key == 9 ) {
 			this.prompt.focus();
+			evt.preventDefault();
 
 			if ( this.prompt.value.match ( /\s(.*)$/ ))
 			{
@@ -613,13 +617,22 @@ function blash ()
 	 */
 	this.refreshPrompt = function ( clearTerm, clearOut )
 	{
-		var value = this.prompt.value;
-		var out = this.cmdOut.innerHTML;
+		var value = "";
+		var out = "";
 		var text = ( this.json.promptText ) ? this.json.promptText : "[%n@%m %W] $ ";
 		text = this.unescapePrompt ( text, this.json.promptSequences );
 
-		this.window.removeChild ( this.prompt );
-		this.window.removeChild ( this.cmdOut );
+		if (( this.prompt = document.getElementById ( "promptText" )))
+		{
+			value = this.prompt.innerHTML;
+			this.window.removeChild ( this.prompt );
+		}
+
+		if (( this.cmdOut = document.getElementById ( "blashCmdOut" )))
+		{
+			out = this.cmdOut.innerHTML;
+			this.window.removeChild ( this.cmdOut );
+		}
 
 		if ( clearTerm )
 		{
@@ -630,7 +643,7 @@ function blash ()
 		{
 			var outDiv = document.createElement ( 'span' );
 			outDiv.innerHTML = ((value.length > 0) ? value : '') +
-				'<br/>' + ((out.length > 0) ? (out + '<br/>') : '') + text;
+				'<br/>' + ((out.length > 0) ? (out + '<br/>') : '') + text + (( shell.__first_cmd ) ? '<br/>' : '' );
 			this.window.appendChild ( outDiv );
 		}
 
@@ -736,6 +749,71 @@ function blash ()
 		}
 
 		return matches;
+	}
+
+	/**
+	 * \brief Check if a file or directory exists
+	 * \return The object reference to the file or directory if it exists, false otherwise
+	 */
+	this.getFile = function ( arg )
+	{
+		if ( !arg || arg.length == 0 )
+		{
+			return false;
+		}
+
+		arg = this.expandPath ( arg );
+
+		for ( var i=0; i < this.files.length; i++ )
+		{
+			if ( this.files[i].path == arg )
+			{
+				return this.files[i];
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * \brief Check if the parent directory of a file exists
+	 * \return The object reference to the parent directory, if it exists and it is actually a directory, false otherwise
+	 */
+	this.getParentDirectory = function ( arg )
+	{
+		if ( !arg || arg.length == 0 )
+		{
+			return false;
+		}
+
+		arg = this.expandPath ( arg );
+
+		if ( arg.match ( /(\/[^\/]+)$/ ))
+		{
+			arg = arg.replace ( RegExp.$1, '' );
+		} else {
+			arg = '/';
+		}
+
+		if ( arg.length == 0 )
+		{
+			arg = '/';
+		}
+
+		for ( var i=0; i < this.files.length; i++ )
+		{
+			if ( this.files[i].path == arg )
+			{
+				if ( this.files[i].type == 'directory' )
+				{
+					return this.files[i];
+				} else {
+					return false;
+				}
+			}
+		}
+
+		return false;
 	}
 }
 

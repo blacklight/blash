@@ -10,33 +10,66 @@
 	{
 		var out = '';
 
-		if ( !arg || arg.length == 0 )
+		if ( !arg || arg.length == 0 || arg == '~' )
 		{
-			return "Parameter expected<br/>\n";
-		}
+			shell.auto_prompt_focus = false;
+			shell.auto_prompt_refresh = false;
+			
+			var users_php = window.location.href;
+			users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+			params = 'action=gethome';
 
-		var found = false;
-		arg = shell.expandPath ( arg );
+			var http = new XMLHttpRequest();
+			http.open ( "POST", users_php, true );
+			http.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
+			http.setRequestHeader ( "Content-length", params.length );
+			http.setRequestHeader ( "Connection", "close" );
 
-		for ( var i=0; i < shell.files.length && !found; i++ )
-		{
-			if ( shell.files[i].path == arg )
+			http.onreadystatechange = function ()
 			{
-				found = true;
-
-				if ( shell.files[i].type != 'directory' )
+				if ( http.readyState == 4 && http.status == 200 )
 				{
-					return "cd: not a directory: " + arg + "<br/>\n";
+					if ( http.responseText.length > 0 )
+					{
+						shell.home = http.responseText;
+						shell.path = shell.home;
+					} else {
+						shell.user = shell.json.user;
+					}
+
+					shell.cmdOut.innerHTML = '';
+					shell.auto_prompt_focus = true;
+					shell.auto_prompt_refresh = true;
+					shell.refreshPrompt ( false, false );
 				}
 			}
+
+			http.send ( params );
+		} else {
+			var found = false;
+			arg = shell.expandPath ( arg );
+
+			for ( var i=0; i < shell.files.length && !found; i++ )
+			{
+				if ( shell.files[i].path == arg )
+				{
+					found = true;
+
+					if ( shell.files[i].type != 'directory' )
+					{
+						return "cd: not a directory: " + arg + "<br/>\n";
+					}
+				}
+			}
+
+			if ( !found )
+			{
+				return "cd: No such file or directory: " + arg + "<br/>\n";
+			}
+
+			shell.path = arg;
 		}
 
-		if ( !found )
-		{
-			return "cd: no such file or directory: " + arg + "<br/>\n";
-		}
-
-		shell.path = arg;
 		return out;
 	},
 }
