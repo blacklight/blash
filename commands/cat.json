@@ -33,7 +33,7 @@
 					{
 						window.open ( dir[i].href );
 					} else if ( dir[i].content ) {
-						return dir[i].content + "<br/>\n";
+						return '<pre>' + dir[i].content + "</pre>";
 					}
 				}
 			}
@@ -46,7 +46,7 @@
 			return "cat: " + arg + ": No such file or directory<br/>\n";
 		}
 
-		out = out.replace ( /<br\/>\s*$/, '' );
+		out = out.replace ( /<br\/?>\s*$/, '' );
 		return out;
 	}
 }

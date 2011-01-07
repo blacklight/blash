@@ -29,8 +29,6 @@ $files_json = <<<JSON
 , {"path": "/contacts", "type": "file", "content": "Contact me at spam@montypython.com"}
 , {"path": "/irc", "type": "file", "content": "IRC channel at #thegame@irc.randomstuff.com"}
 , {"path": "/root", "type": "directory", "can_write": "root", "can_read": "root"}
-, {"path": "/home/blacklight", "type": "directory", "owner": "blacklight", "can_read": "blacklight", "can_write": "blacklight"}
-, {"path": "/home/blacklight/.blashrc", "type": "file", "owner": "guest", "can_read": "blacklight", "can_write": "blacklight", "content": "/**<br/> * Sample configuration and contents<br/> */<br/><br/>{<br/>\u0009'banner' : 'Welcome back to blash&lt;br/&gt;&lt;br/&gt;',<br/>\u0009'machine' : 'localhost',<br/><br/>\u0009/**<br/>\u0009 * Macros for promptText:<br/>\u0009 * #{xxx} or #{xxxxxx} - use the specified HTML colour<br/>\u0009 * %n - username<br/>\u0009 * %m - machine name<br/>\u0009 * %W - current working directory<br/>\u0009 */<br/>\u0009'promptText' : '[#{008}%n#{888}@#{008}%m#{888} %W] $ '<br/>}<br/><br/>"}
 ]
 
 JSON;

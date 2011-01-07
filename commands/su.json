@@ -132,56 +132,103 @@
 									shell.user = shell.json.user;
 								}
 
-								shell.auto_prompt_focus = true;
-								shell.auto_prompt_refresh = true;
-								shell.refreshPrompt ( false, false );
+								shell.files_json = window.location.href;
 
-								blashrcIndex = -1; // Index of .blashrc file
-
-								for ( var i in shell.files )
+								if ( shell.has_users )
 								{
-									if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.blashrc$' )))
+									shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/files.php' );
+								} else {
+									shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/system/files.json' );
+								}
+
+								var http3 = new XMLHttpRequest();
+								http3.open ( "GET", shell.files_json, true );
+
+								http3.onreadystatechange = function ()
+								{
+									if ( http3.readyState == 4 && http3.status == 200 )
 									{
-										blashrcIndex = i;
-										break;
+										shell.files = eval ( '(' + http3.responseText + ')' );
+										blashrcIndex = -1; // Index of .blashrc file
+										stylercIndex = -1; // Index of .stylerc file
+
+										for ( var i in shell.files )
+										{
+											if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.blashrc$' )))
+											{
+												blashrcIndex = i;
+											}
+
+											if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.stylerc$' )))
+											{
+												stylercIndex = i;
+											}
+
+											if ( blashrcIndex >= 0 && stylercIndex >= 0 )
+											{
+												break;
+											}
+										}
+
+										if ( blashrcIndex > 0 )
+										{
+											var blashrc = shell.files[blashrcIndex].content.replace ( /<br\/?>/g, ' ' );
+											blashrc = eval ( '(' + blashrc + ')' );
+
+											if ( !blashrc )
+											{
+												return false;
+											}
+
+											for ( var i in blashrc )
+											{
+												shell.json[i] = blashrc[i];
+											}
+										}
+
+										if ( stylercIndex > 0 )
+										{
+											var cur_style = document.getElementsByTagName ( 'link' );
+
+											for ( var i in cur_style )
+											{
+												if ( cur_style[i].getAttribute )
+												{
+													if ( cur_style[i].getAttribute ( 'rel' ) && cur_style[i].getAttribute ( 'href' ))
+													{
+														if ( cur_style[i].getAttribute ( 'rel' ) == 'stylesheet'
+																&& cur_style[i].getAttribute ( 'href' ).match ( /blash\.css$/ ))
+														{
+															var parent = cur_style[i].parentNode;
+															cur_style[i].parentNode.removeChild ( cur_style[i] );
+
+															var stylerc = document.createElement ( 'style', { type: 'text/css' });
+															stylerc.innerHTML = shell.files[stylercIndex].content.replace ( /<br\/?>/g, ' ' );
+															parent.appendChild ( stylerc );
+														}
+													}
+												}
+											}
+										}
 									}
 								}
 
-								if ( blashrcIndex > 0 )
-								{
-									var blashrc = shell.files[blashrcIndex].content.replace ( /<br\/?>/g, ' ' );
-									blashrc = eval ( '(' + blashrc + ')' );
-
-									if ( !blashrc )
-									{
-										return false;
-									}
-
-									for ( var i in blashrc )
-									{
-										shell.json[i] = blashrc[i];
-									}
-								}
+								http3.send ( null );
 							}
 						}
 
 						xml2.send ( params );
-						shell.cmdOut.innerHTML = http.responseText;
-					} else {
-						shell.cmdOut.innerHTML = http.responseText;
-						shell.auto_prompt_focus = true;
-						shell.auto_prompt_refresh = true;
-						shell.refreshPrompt ( false, false );
 					}
+
+					shell.cmdOut.innerHTML = http.responseText;
+					shell.auto_prompt_focus = true;
+					shell.auto_prompt_refresh = true;
+					shell.refreshPrompt ( false, false );
 				}
 			}
 
 			http.send ( params );
-
 			shell.cmdOut.innerHTML = '';
-			// shell.auto_prompt_focus = true;
-			// shell.auto_prompt_refresh = true;
-			// shell.refreshPrompt ( false, false );
 		}
 	},
 }

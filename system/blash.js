@@ -234,12 +234,22 @@ function blash ()
 
 					shell.files = tmp;
 					blashrcIndex = -1; // Index of .blashrc file
+					stylercIndex = -1; // Index of .stylerc file
 
 					for ( var i in shell.files )
 					{
 						if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.blashrc$' )))
 						{
 							blashrcIndex = i;
+						}
+
+						if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.stylerc$' )))
+						{
+							stylercIndex = i;
+						}
+
+						if ( blashrcIndex >= 0 && stylercIndex >= 0 )
+						{
 							break;
 						}
 					}
@@ -257,6 +267,31 @@ function blash ()
 						for ( var i in blashrc )
 						{
 							shell.json[i] = blashrc[i];
+						}
+					}
+
+					if ( stylercIndex > 0 )
+					{
+						var cur_style = document.getElementsByTagName ( 'link' );
+
+						for ( var i in cur_style )
+						{
+							if ( cur_style[i].getAttribute )
+							{
+								if ( cur_style[i].getAttribute ( 'rel' ) && cur_style[i].getAttribute ( 'href' ))
+								{
+									if ( cur_style[i].getAttribute ( 'rel' ) == 'stylesheet'
+											&& cur_style[i].getAttribute ( 'href' ).match ( /blash\.css$/ ))
+									{
+										var parent = cur_style[i].parentNode;
+										cur_style[i].parentNode.removeChild ( cur_style[i] );
+
+										var stylerc = document.createElement ( 'style', { type: 'text/css' });
+										stylerc.innerHTML = shell.files[stylercIndex].content.replace ( /<br\/?>/g, ' ' );
+										parent.appendChild ( stylerc );
+									}
+								}
+							}
 						}
 					}
 				}
@@ -650,14 +685,20 @@ function blash ()
 
 		if (( this.prompt = document.getElementById ( "promptText" )))
 		{
-			value = this.prompt.innerHTML;
-			this.window.removeChild ( this.prompt );
+			value = this.prompt.innerHTML + (( document.getElementsByName ( 'blashPrompt' )[0].value.length > 0 ) ?
+				' ' + document.getElementsByName ( 'blashPrompt' )[0].value : '' );
+			this.prompt.parentNode.removeChild ( document.getElementsByName ( 'blashPrompt' )[0] );
+		}
+
+		if ( document.getElementsByName ( 'blashPrompt' )[0] )
+		{
+			document.getElementsByName ( 'blashPrompt' )[0].parentNode.removeChild ( document.getElementsByName ( 'blashPrompt' )[0] );
 		}
 
 		if (( this.cmdOut = document.getElementById ( "blashCmdOut" )))
 		{
 			out = this.cmdOut.innerHTML;
-			this.window.removeChild ( this.cmdOut );
+			this.cmdOut.parentNode.removeChild ( this.cmdOut );
 		}
 
 		if ( clearTerm )
@@ -667,9 +708,15 @@ function blash ()
 		
 		if ( !clearOut )
 		{
+			if ( document.getElementById ( 'promptText' ))
+			{
+				document.getElementById ( 'promptText' ).parentNode.removeChild ( document.getElementById ( 'promptText' ));
+			}
+
 			var outDiv = document.createElement ( 'span' );
 			outDiv.innerHTML = ((value.length > 0) ? value : '') +
-				'<br/>' + ((out.length > 0) ? (out + '<br/>') : '') + text + (( shell.__first_cmd ) ? '<br/>' : '' );
+				( value.match ( /<br\/?>\s*$/ ) ? '' : '<br/>' ) + ((out.length > 0) ? (out + '<br/>') : '') + text + (( shell.__first_cmd ) ? '<br/>' : '' );
+			outDiv.innerHTML = outDiv.innerHTML.replace ( /<br\/?>\s*$/, '' );
 			this.window.appendChild ( outDiv );
 		}
 

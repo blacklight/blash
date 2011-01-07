@@ -73,6 +73,7 @@ switch ( $action )
 
 		print __mkdir ( '/home/'.$username, $perms )."<br/>\n";
 		set_content ( '/home/'.$username.'/.blashrc', file_get_contents ( '../../system/default_blashrc.json' ));
+		set_content ( '/home/'.$username.'/.stylerc', file_get_contents ( '../../system/default_stylerc.css' ));
 
 		include "../../system/files_json.php";
 
@@ -90,7 +91,8 @@ switch ( $action )
 
 		for ( $i=0; $i < count ( $json ); $i++ )
 		{
-			if ( $json[$i]['path'] == '/home/'.$username.'/.blashrc' )
+			if ( $json[$i]['path'] == '/home/'.$username.'/.blashrc'
+				|| $json[$i]['path'] == '/home/'.$username.'/.stylerc' )
 			{
 				$json[$i]['can_read'] = $username;
 				$json[$i]['can_write'] = $username;
@@ -102,8 +104,6 @@ switch ( $action )
 
 				fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
 				fclose ( $fp );
-
-				break;
 			}
 		}
 

@@ -3,7 +3,7 @@
 
 	"info" :  {
 		"syntax" : "chmod &lt;perms&gt; &lt;file|directory&gt;",
-		"brief" : "Change the access permissions to a file or directory for one or more users or groups, for example chmod user1,user2,@group1,@group2+r"
+		"brief" : "Change the access permissions to a file or directory for one or more users or groups, example: \"chmod user1,user2,@group1,@group2+r /path\", \"chmod @all+rw /path\""
 	},
 
 	"action" : function ( arg )
