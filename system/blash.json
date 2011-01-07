@@ -55,6 +55,7 @@
 	"commands" : [
 		"cat",
 		"cd",
+		"chmod",
 		"clear",
 		"echo",
 		"eval",

@@ -10,8 +10,6 @@ $files_json = <<<JSON
 , {"path": "/software", "type": "directory"}
 , {"path": "/etc", "type": "directory"}
 , {"path": "/home", "type": "directory"}
-, {"path": "/home/guest", "type": "directory"}
-, {"path": "/home/guest/mbox", "type": "file", "content": "No new mail"}
 , {"path": "/google", "type": "file", "href": "http://www.google.com"}
 , {"path": "/blog/post1", "type": "file", "content": "This is my first post"}
 , {"path": "/blog/post2", "type": "file", "content": "This is my second post"}
@@ -30,9 +28,7 @@ $files_json = <<<JSON
 , {"path": "/aboutme", "type": "file", "content": "Luke, I am your father"}
 , {"path": "/contacts", "type": "file", "content": "Contact me at spam@montypython.com"}
 , {"path": "/irc", "type": "file", "content": "IRC channel at #thegame@irc.randomstuff.com"}
-, {"path": "/root", "type": "directory", "can_read": "root", "can_write": "root"}
-, {"path": "/home/blacklight", "type": "directory", "owner": "blacklight", "can_read": "blacklight", "can_write": "blacklight"}
-, {"path": "/home/blacklight/lol", "type": "file", "owner": "blacklight", "can_read": "@all", "can_write": "blacklight", "content": "#include &lt;stdio.h&gt;<br/><br/>int main () {<br/>  printf ( 'loln' );<br/>}"}
+, {"path": "/root", "type": "directory", "can_write": "root", "can_read": "root"}
 ]
 
 JSON;

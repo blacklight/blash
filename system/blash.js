@@ -74,7 +74,7 @@ function blash ()
 	this.loadCommand = function ( cmd )
 	{
 		var cmd_file = window.location.href;
-		cmd_file = cmd_file.replace ( /\/([a-zA-Z\.]+)$/, '/commands/' + cmd  + ".json" );
+		cmd_file = cmd_file.replace ( /\/([a-zA-Z_\.]+)$/, '/commands/' + cmd  + ".json" );
 
 		var http = new XMLHttpRequest();
 		http.open ( "GET", cmd_file, true );
@@ -97,7 +97,7 @@ function blash ()
 			this.user = RegExp.$1;
 			var params = 'action=getuser';
 			var users_php = window.location.href;
-			users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+			users_php = users_php.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/users.php' );
 
 			var xml = new XMLHttpRequest();
 			xml.open ( "POST", users_php, true );
@@ -148,7 +148,7 @@ function blash ()
 	this.prompt.focus();
 
 	var json_config = window.location.href;
-	json_config = json_config.replace ( /\/([a-zA-Z\.]+)$/, '/system/blash.json' );
+	json_config = json_config.replace ( /\/([a-zA-Z_\.]+)$/, '/system/blash.json' );
 
 	var http = new XMLHttpRequest();
 	http.open ( "GET", json_config, true );
@@ -197,9 +197,9 @@ function blash ()
 
 			if ( shell.has_users )
 			{
-				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/files.php' );
 			} else {
-				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z\.]+)$/, '/system/files.json' );
+				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/system/files.json' );
 			}
 
 			var http2 = new XMLHttpRequest();
@@ -233,6 +233,32 @@ function blash ()
 					}
 
 					shell.files = tmp;
+					blashrcIndex = -1; // Index of .blashrc file
+
+					for ( var i in shell.files )
+					{
+						if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.blashrc$' )))
+						{
+							blashrcIndex = i;
+							break;
+						}
+					}
+
+					if ( blashrcIndex > 0 )
+					{
+						var blashrc = shell.files[blashrcIndex].content.replace ( /<br\/?>/g, ' ' );
+						blashrc = eval ( '(' + blashrc + ')' );
+
+						if ( !blashrc )
+						{
+							return false;
+						}
+
+						for ( var i in blashrc )
+						{
+							shell.json[i] = blashrc[i];
+						}
+					}
 				}
 			}
 

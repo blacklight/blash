@@ -81,6 +81,22 @@
 
 		http.send ( params );
 		shell.path = shell.json.basepath;
+
+		var json_config = window.location.href;
+		json_config = json_config.replace ( /\/([a-zA-Z_\.]+)$/, '/system/blash.json' );
+
+		var http2 = new XMLHttpRequest();
+		http2.open ( "GET", json_config, true );
+
+		http2.onreadystatechange = function ()
+		{
+			if ( http2.readyState == 4 && http2.status == 200 )
+			{
+				shell.json = eval ( '(' + http2.responseText + ')' );
+			}
+		}
+
+		http2.send ( null );
 		return out;
 	},
 }

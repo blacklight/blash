@@ -135,6 +135,33 @@
 								shell.auto_prompt_focus = true;
 								shell.auto_prompt_refresh = true;
 								shell.refreshPrompt ( false, false );
+
+								blashrcIndex = -1; // Index of .blashrc file
+
+								for ( var i in shell.files )
+								{
+									if ( shell.files[i].path.match ( new RegExp ( '^' + shell.home + '/.blashrc$' )))
+									{
+										blashrcIndex = i;
+										break;
+									}
+								}
+
+								if ( blashrcIndex > 0 )
+								{
+									var blashrc = shell.files[blashrcIndex].content.replace ( /<br\/?>/g, ' ' );
+									blashrc = eval ( '(' + blashrc + ')' );
+
+									if ( !blashrc )
+									{
+										return false;
+									}
+
+									for ( var i in blashrc )
+									{
+										shell.json[i] = blashrc[i];
+									}
+								}
 							}
 						}
 

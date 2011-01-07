@@ -118,8 +118,8 @@
 				if ( file.content.length > 0 )
 				{
 					var content = file.content.replace ( /<br\/?>/g, "\n" );
-					content = content.replace ( '&lt;', '<' );
-					content = content.replace ( '&gt;', '>' );
+					content = content.replace ( /&lt;/g, '<' );
+					content = content.replace ( /&gt;/g, '>' );
 					editor.value = content;
 					has_content = true;
 				}

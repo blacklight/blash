@@ -71,6 +71,7 @@ switch ( $action )
 
 		$GLOBALS['sudo_cmd'] = true;
 		print __mkdir ( '/home/'.$username, $perms )."<br/>\n";
+		set_content ( '/home/'.$username.'/.blashrc', file_get_contents ( '../../system/default_blashrc.json' ));
 		$GLOBALS['sudo_cmd'] = false;
 
 		print 'User "'.$username.'" successfully added, home directory set to "/home/'.$username."\"\n";
@@ -241,6 +242,19 @@ switch ( $action )
 		print __rm ( $file );
 		break;
 
+	case 'chmod':
+		$resource = $_REQUEST['resource'];
+		$perms = $_REQUEST['perms'];
+		$userlist = $_REQUEST['userlist'];
+
+		if ( !( $resource && $perms ))
+		{
+			return false;
+		}
+
+		print __chmod ( $resource, (( $userlist ) ? $userlist : null ), $perms );
+		break;
+
 	case 'set_content':
 		$file = $_REQUEST['file'];
 		$content = $_REQUEST['content'];
@@ -251,6 +265,12 @@ switch ( $action )
 		}
 
 		print set_content ( $file, $content );
+
+		// If this was a sudo command, for example for creating .blashrc file,
+		// revoke sudo permissions now
+		if ( $GLOBALS['sudo_cmd'] == true )
+			$GLOBALS['sudo_cmd'] = false;
+
 		break;
 
 	default :

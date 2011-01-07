@@ -34,6 +34,26 @@ function getUser ()
 	return "guest";
 }
 
+function userExists ( $user )
+{
+	include 'userlist.php';
+
+	if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+	{
+		return "Unable to open the users XML file\n";
+	}
+
+	for ( $i = 0; $i < count ( $xml->user ); $i++ )
+	{
+		if ( !strcmp ( $xml->user[$i]['name'], $user ))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 function getHome ()
 {
 	include 'userlist.php';
@@ -304,6 +324,147 @@ function __json_encode( $data ) {
 	
 	return $json;
 } 
+
+function __chmod ( $resource, $userlist, $perms )
+{
+	include "../../system/files_json.php";
+	$user = getUser();
+	$file_index = -1;
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	$json = json_decode ( $files_json, true );
+
+	if ( !$json )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	for ( $i=0; $i < count ( $json ) && $file_index == -1; $i++ )
+	{
+		if ( $json[$i]['path'] == $resource )
+		{
+			$file_index = $i;
+		}
+	}
+
+	if ( $file_index == -1 )
+	{
+		return "chmod: No such file or directory";
+	}
+
+	$perm = json_decode ( getPerms ( $json[$file_index]['path'] ), true );
+
+	if ( !$perm['write'] )
+	{
+		return "chmod: Permission denied";
+	}
+
+	if ( $userlist )
+	{
+		$userlist = preg_split ( '/,\s*/', $userlist );
+	} else {
+		$userlist = array();
+		$userlist[0] = $user;
+	}
+
+	$can = array();
+	$perm = array();
+	$perm['set'] = ( $perms & 0x4 ) ? true : false;
+	$perm['read'] = ( $perms & 0x2 ) ? true : false;
+	$perm['write'] = ( $perms & 0x1 ) ? true : false;
+
+	foreach ( array ( 'read', 'write' ) as $action )
+	{
+		if ( $perm['set'] )
+		{
+			if ( $perm[$action] )
+			{
+				if ( !$json[$file_index]['can_'.$action] )
+				{
+					$json[$file_index]['can_'.$action] = join ( ", ", $userlist );
+				} else {
+					$out = '';
+					$can[$action] = preg_split ( '/,\s*/', $json[$file_index]['can_'.$action] );
+
+					for ( $i=0; $i < count ( $userlist ); $i++ )
+					{
+						if ( !userExists ( $userlist[$i] ) && !preg_match ( '/^\s*@/', $userlist[$i] ))
+						{
+							continue;
+						}
+
+						$user_found = false;
+
+						for ( $j=0; $j < count ( $can[$action] ) && !$user_found; $j++ )
+						{
+							if ( $userlist[$i] == $can[$action][$j] )
+							{
+								$user_found = true;
+							}
+						}
+
+						if ( !$user_found )
+						{
+							if ( strlen ( $out ) == 0 )
+							{
+								$out .= $userlist[$i];
+							} else {
+								$out .= ', '.$userlist[$i];
+							}
+						}
+					}
+
+					if ( strlen ( $out ) > 0 )
+					{
+						$json[$file_index]['can_'.$action] .= ', '.$out;
+					}
+				}
+			}
+		} else {
+			if ( $perm[$action] )
+			{
+				if ( !$json[$file_index]['can_'.$action] )
+				{
+					continue;
+				} else {
+					for ( $i=0; $i < count ( $userlist ); $i++ )
+					{
+						if ( preg_match ( '/(,?\s*)'.$userlist[$i].'(,?)/', $json[$file_index]['can_'.$action], $matches ))
+						{
+							$replace = '';
+
+							if ( preg_match ( '/^\s*$/', $matches[1] ) || preg_match ( '/^\s*$/', $matches[2] ))
+							{
+								$replace = '';
+							} else {
+								$replace = ", ";
+							}
+
+							$json[$file_index]['can_'.$action] = preg_replace ( '/(,?\s*)'.$userlist[$i].'(,?)/', $replace, $json[$file_index]['can_'.$action] );
+						}
+					}
+
+					if ( strlen ( $json[$file_index]['can_'.$action] ) == 0 )
+					{
+						unset ( $json[$file_index]['can_'.$action] );
+					}
+				}
+			}
+		}
+	}
+
+	if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+	{
+		return "Unable to write on directories file\n";
+	}
+
+	fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+	fclose ( $fp );
+}
 
 function set_content ( $file, $content )
 {

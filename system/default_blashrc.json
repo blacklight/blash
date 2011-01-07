@@ -1,0 +1,18 @@
+/**
+ * Sample configuration and contents
+ */
+
+{
+	"banner" : "Welcome back to blash<br/><br/>",
+	"machine" : "localhost",
+
+	/**
+	 * Macros for promptText:
+	 * #{xxx} or #{xxxxxx} - use the specified HTML colour
+	 * %n - username
+	 * %m - machine name
+	 * %W - current working directory
+	 */
+	"promptText" : "[#{800}%n#{888}@#{800}%m#{888} %W] $ "
+}
+
