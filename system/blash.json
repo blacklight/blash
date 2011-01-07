@@ -73,6 +73,7 @@
 		"su",
 		"touch",
 		"useradd",
+		"userdel",
 		"whoami"
 	]
 }

@@ -70,11 +70,95 @@ switch ( $action )
 		$perms['can_write'] = $username;
 
 		$GLOBALS['sudo_cmd'] = true;
+
 		print __mkdir ( '/home/'.$username, $perms )."<br/>\n";
 		set_content ( '/home/'.$username.'/.blashrc', file_get_contents ( '../../system/default_blashrc.json' ));
+
+		include "../../system/files_json.php";
+
+		if ( !$files_json || strlen ( $files_json ) == 0 )
+		{
+			return 'Error: Empty JSON file container';
+		}
+
+		$json = json_decode ( $files_json, true );
+
+		if ( !$json )
+		{
+			return 'Error: Empty JSON file container';
+		}
+
+		for ( $i=0; $i < count ( $json ); $i++ )
+		{
+			if ( $json[$i]['path'] == '/home/'.$username.'/.blashrc' )
+			{
+				$json[$i]['can_read'] = $username;
+				$json[$i]['can_write'] = $username;
+
+				if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+				{
+					return "Unable to write on directories file\n";
+				}
+
+				fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+				fclose ( $fp );
+
+				break;
+			}
+		}
+
 		$GLOBALS['sudo_cmd'] = false;
 
 		print 'User "'.$username.'" successfully added, home directory set to "/home/'.$username."\"\n";
+		break;
+
+	case 'del':
+		$user= $_REQUEST['user'];
+
+		if ( $user == null )
+		{
+			return false;
+		}
+
+		$cur_user = getUser();
+
+		if ( $cur_user != 'root' && $cur_user != $user && !$GLOBALS['sudo_cmd'] )
+		{
+			print "You cannot remove the specified user: Permission denied\n";
+			return false;
+		}
+
+		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+		{
+			print "Unable to open the users XML file\n";
+			return false;
+		}
+
+		$user_found = false;
+
+		for ( $i = 0; $i < count ( $xml->user ) && !$user_found; $i++ )
+		{
+			if ( !strcmp ( $xml->user[$i]['name'], $user ))
+			{
+				unset ( $xml->user[$i] );
+				$user_found = true;
+			}
+		}
+
+		if ( !$user_found )
+		{
+			print "Username not found\n";
+			return false;
+		}
+
+		if ( !( $fp = fopen ( 'userlist.php', 'w' )))
+		{
+			print "Unable to add the specified user, unknown error\n";
+			return false;
+		}
+
+		fwrite ( $fp, '<?php'."\n\n".'$xmlcontent = <<<XML'."\n" . $xml->asXML() . "\nXML;\n\n?>\n" );
+		fclose ( $fp );
 		break;
 
 	case 'login':
@@ -265,12 +349,6 @@ switch ( $action )
 		}
 
 		print set_content ( $file, $content );
-
-		// If this was a sudo command, for example for creating .blashrc file,
-		// revoke sudo permissions now
-		if ( $GLOBALS['sudo_cmd'] == true )
-			$GLOBALS['sudo_cmd'] = false;
-
 		break;
 
 	default :
