@@ -404,26 +404,46 @@ function blash ()
 				this.history.push ( this.prompt.value );
 				this.history_index = -1;
 
-				for ( i=0; i < this.commands.length && !cmd_found; i++ )
+				if ( cmd.match ( /^\.\/(.*)$/ ))
 				{
-					if ( this.commands[i].name == cmd )
-					{
-						cmd_found = true;
-						var out = this.commands[i].action ( arg );
+					file = this.expandPath ( RegExp.$1 );
 
-						if ( out )
+					for ( var i in this.files )
+					{
+						if ( this.files[i]['path'] == file )
 						{
-							if ( out.length > 0 )
+							if ( !this.files[i].href )
 							{
-								this.cmdOut.innerHTML = out;
+								this.cmdOut.innerHTML = "blash: permission denied";
+							} else {
+								window.open ( this.files[i].href );
+							}
+
+							break;
+						}
+					}
+				} else {
+					for ( i=0; i < this.commands.length && !cmd_found; i++ )
+					{
+						if ( this.commands[i].name == cmd )
+						{
+							cmd_found = true;
+							var out = this.commands[i].action ( arg );
+
+							if ( out )
+							{
+								if ( out.length > 0 )
+								{
+									this.cmdOut.innerHTML = out;
+								}
 							}
 						}
 					}
-				}
 
-				if ( !cmd_found )
-				{
-					this.cmdOut.innerHTML = this.json.shellName + ": command not found: " + cmd + '<br/>';
+					if ( !cmd_found )
+					{
+						this.cmdOut.innerHTML = this.json.shellName + ": command not found: " + cmd + '<br/>';
+					}
 				}
 			}
 
