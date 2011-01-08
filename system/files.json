@@ -34,26 +34,6 @@
 		"type" : "directory"
 	},
 	{
-		"path" : "/home/guest",
-		"type" : "directory"
-	},
-	{
-		"path" : "/home/guest/mbox",
-		"type" : "file",
-		"content" : "No new mail"
-	},
-	{
-		"path" : "/home/blacklight",
-		"type" : "directory",
-		"can_read" : "blacklight",
-		"can_write" : "blacklight"
-	},
-	{
-		"path" : "/home/blacklight/mbox",
-		"type" : "file",
-		"content" : "No new mail"
-	},
-	{
 		"path" : "/google",
 		"type" : "file",
 		"href" : "http://www.google.com"

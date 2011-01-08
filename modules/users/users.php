@@ -351,6 +351,36 @@ switch ( $action )
 		print set_content ( $file, $content );
 		break;
 
+	case 'list':
+		if ( !( $xml = new SimpleXMLElement ( $xmlcontent )))
+		{
+			print "Unable to open the users XML file\n";
+			return false;
+		}
+
+		$users = array();
+
+		for ( $i = 0; $i < count ( $xml->user ); $i++ )
+		{
+			array_push ( $users, $xml->user[$i]['name'] );
+		}
+
+		sort ( $users, SORT_STRING );
+
+		foreach ( $users as $i => $user )
+		{
+			print $user;
+
+			if ( $i < count ( $users ) - 1 )
+			{
+				print "<br/>";
+			}
+
+			print "\n";
+		}
+
+		break;
+
 	default :
 		print "Unallowed action\n";
 		break;

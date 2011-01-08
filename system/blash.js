@@ -268,6 +268,22 @@ function blash ()
 						{
 							shell.json[i] = blashrc[i];
 						}
+
+						if ( blashrc['banner'] )
+						{
+							if ( document.getElementById ( 'banner' ))
+							{
+								document.getElementById ( 'banner' ).innerHTML = blashrc['banner'] + '<br/><br/>';
+							}
+						}
+
+						if ( blashrc['promptText'] )
+						{
+							if ( document.getElementById ( 'promptText' ))
+							{
+								document.getElementById ( 'promptText' ).innerHTML = shell.unescapePrompt ( blashrc['promptText'], shell.json.promptSequences );
+							}
+						}
 					}
 
 					if ( stylercIndex > 0 )
