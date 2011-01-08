@@ -404,9 +404,14 @@ function blash ()
 				this.history.push ( this.prompt.value );
 				this.history_index = -1;
 
-				if ( cmd.match ( /^\.\/(.*)$/ ))
+				if ( cmd.match ( /^\.?\/(.*)$/ ))
 				{
 					file = this.expandPath ( RegExp.$1 );
+
+					if ( cmd.match ( /^(\/.*)$/ ))
+					{
+						file = this.expandPath ( RegExp.$1 );
+					}
 
 					for ( var i in this.files )
 					{
