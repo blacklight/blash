@@ -1,0 +1,120 @@
+{
+	"name" : "ln",
+
+	"info" : {
+		"syntax" : "ln &lt;path or URL&gt; &lt;link name&gt;",
+		"brief" : "Link a specified path inside the system or a URL to a new link file",
+	},
+
+	"action" : function ( arg )
+	{
+		var res = null;
+		var link = null;
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "Usage: " + this.info.syntax + "<br/>\n";
+		}
+
+		if ( arg.match ( /^\s*('|")([^'|"]+)('|")/ ))
+		{
+			res = RegExp.$2;
+			arg = arg.replace ( new RegExp ( '^\s*' + RegExp.$1 + RegExp.$2 + RegExp.$3 + '\s*' ), '' );
+		} else if ( arg.match ( /^\s*([^\s]+)/ )) {
+			res = RegExp.$1;
+			arg = arg.replace ( new RegExp ( '^\s*' + RegExp.$1 + '\s*' ), '' );
+		} else {
+			return "Usage: " + this.info.syntax + "<br/>\n";
+		}
+
+		if ( !res || arg.length == 0 )
+		{
+			return "Usage: " + this.info.syntax + "<br/>\n";
+		}
+
+		if ( arg.match ( /^\s*('|")([^'|"]+)('|")/ ))
+		{
+			link = RegExp.$2;
+		} else {
+			arg.match ( /^\s*(.*)$/ );
+			link = RegExp.$1;
+		}
+
+		var link_type = null;
+
+		if ( res.match ( /^[a-z0-9]+:\/\// ))
+		{
+			link_type = 'href';
+		} else {
+			link_type = 'local';
+		}
+
+		var users_php = window.location.href;
+		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		shell.auto_prompt_refresh = false;
+		link = shell.expandPath ( link );
+		params = 'action=link&resource=' + escape ( res ) + '&link=' + escape ( link ) + '&type=' + escape ( link_type );
+		
+		var http = new XMLHttpRequest();
+		http.open ( "POST", users_php, true );
+		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
+		http.setRequestHeader( "Content-length", params.length );
+		http.setRequestHeader( "Connection", "close" );
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				if ( http.responseText.length > 0 )
+				{
+					shell.cmdOut.innerHTML = http.responseText;
+				}
+
+				var files_config = window.location.href;
+				files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+				var http2 = new XMLHttpRequest();
+				http2.open ( "GET", files_config, true );
+
+				http2.onreadystatechange = function ()
+				{
+					if ( http2.readyState == 4 && http2.status == 200 )
+					{
+						shell.files = eval ( '(' + http2.responseText + ')' );
+
+						// Remove duplicates
+						var tmp = new Array();
+
+						for ( var i in shell.files )
+						{
+							var contains = false;
+
+							for ( var j=0; j < tmp.length && !contains; j++ )
+							{
+								if ( shell.files[i].path == tmp[j].path )
+								{
+									contains = true;
+								}
+							}
+
+							if ( !contains )
+							{
+								tmp.push ( shell.files[i] );
+							}
+						}
+
+						shell.files = tmp;
+					}
+				}
+
+				http2.send ( null );
+				shell.auto_prompt_refresh = true;
+				shell.refreshPrompt ( false, false );
+			}
+		}
+
+		http.send ( params );
+		shell.cmdOut.innerHTML = '';
+	}
+}
+

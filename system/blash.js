@@ -392,7 +392,20 @@ function blash ()
 		} else if ( key == 76 && evt.ctrlKey ) {
 			// CTRL-l clears the screen
 			evt.preventDefault();
-			this.refreshPrompt ( true, false );
+			this.refreshPrompt ( true, true );
+			this.cmdOut.innerHTML = '';
+
+			var text = ( this.json.promptText ) ? this.json.promptText : "[%n@%m %W] $ ";
+			text = this.unescapePrompt ( text, this.json.promptSequences );
+
+			var outDiv = document.createElement ( 'span' );
+			outDiv.innerHTML = text;
+			//outDiv.innerHTML = ((value.length > 0) ? value : '') +
+			//	( value.match ( /<br\/?>\s*$/ ) ? '' : '<br/>' ) + ((out.length > 0) ? (out + '<br/>') : '') + text + (( shell.__first_cmd ) ? '<br/>' : '' );
+			//outDiv.innerHTML = outDiv.innerHTML.replace ( /<br\/?>\s*$/, '' );
+			this.window.insertBefore ( outDiv, document.getElementsByName ( "blashPrompt" )[0] );
+			// this.window.appendChild ( outDiv );
+
 			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
 			if ( this.prompt.value.length != 0 && ( key != 67 || !evt.ctrlKey ))

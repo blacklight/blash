@@ -32,6 +32,8 @@
 					if ( dir[i].href )
 					{
 						window.open ( dir[i].href );
+					} else if ( dir[i].link_to && dir[i].link_to.length > 0 ) {
+						return this.action ( dir[i].link_to );
 					} else if ( dir[i].content ) {
 						return '<pre>' + dir[i].content + "</pre>";
 					}

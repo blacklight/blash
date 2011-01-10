@@ -62,6 +62,7 @@
 		"find",
 		"grep",
 		"logout",
+		"ln",
 		"ls",
 		"man",
 		"mkdir",

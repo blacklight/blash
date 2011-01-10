@@ -55,8 +55,9 @@
 				{
 					found = true;
 
-					if ( shell.files[i].type != 'directory' )
-					{
+					if ( shell.files[i].link_to && shell.files[i].link_to.length > 0 ) {
+						return this.action ( shell.files[i].link_to );
+					} else if ( shell.files[i].type != 'directory' ) {
 						return "cd: not a directory: " + arg + "<br/>\n";
 					}
 				}

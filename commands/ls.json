@@ -51,6 +51,7 @@
 					"path" : RegExp.$1,
 					"type" : dir.type,
 					"href" : dir.href,
+					"link" : dir.link_to
 				});
 			}
 		}
@@ -114,6 +115,8 @@
 							if ( dirs[i].href && dirs[i].href.length > 0 )
 							{
 								out += '<a href="' + dirs[i].href + '" class="file" target="_new">' + dirs[i].path + '</a>*<br/>';
+							} else if ( dirs[i].link && dirs[i].link.length > 0 ) {
+								out += '<span class="link">' + dirs[i].path + '</span>@ -&gt; ' + dirs[i].link + '<br/>';
 							} else {
 								out += dirs[i].path + '<br/>';
 							}

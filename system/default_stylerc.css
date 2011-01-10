@@ -1,7 +1,3 @@
-/**
- * Default style for blash
- */
-
 body
 {
 	background-color : black;
@@ -51,6 +47,11 @@ div#blashWindow
 span.directory
 {
 	color : #2553ee;
+}
+
+span.link
+{
+	color : #46a4ef;
 }
 
 a

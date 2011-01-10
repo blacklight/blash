@@ -259,6 +259,65 @@ function getPerms ( $resource )
 	return $response;
 }
 
+function __link ( $resource, $link, $type )
+{
+	$ret =  __touch ( $link, null );
+
+	if ( strlen ( $ret ) > 0 )
+	{
+		return $ret;
+	}
+
+	include "../../system/files_json.php";
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	$json = json_decode ( $files_json, true );
+
+	if ( !$json )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	for ( $i=0; $i < count ( $json ); $i++ )
+	{
+		$path = $json[$i]['path'];
+
+		if ( !$path || strlen ( $path ) == 0 )
+		{
+			continue;
+		}
+
+		if ( $path == $link )
+		{
+			unset ( $json[$i]['content'] );
+
+			if ( $type == 'href' )
+			{
+				$json[$i]['href'] = $resource;
+			} else if ( $type == 'local' ) {
+				$json[$i]['link_to'] = $resource;
+			} else {
+				return "No link type specified (href|local)\n";
+			}
+
+			if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+			{
+				return "Unable to write on directories file\n";
+			}
+
+			fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+			fclose ( $fp );
+			return false;
+		}
+	}
+
+	return "Unable to link the resource";
+}
+
 function __json_encode( $data ) {           
 	if ( is_array ($data) || is_object ($data) ) {
 		$islist = is_array ($data) && ( empty ($data) || array_keys ($data) === range (0,count($data)-1) );

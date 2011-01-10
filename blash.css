@@ -49,6 +49,11 @@ span.directory
 	color : #2553ee;
 }
 
+span.link
+{
+	color : #46a4ef;
+}
+
 a
 {
 	color : green;

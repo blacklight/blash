@@ -10,7 +10,6 @@ $files_json = <<<JSON
 , {"path": "/software", "type": "directory"}
 , {"path": "/etc", "type": "directory"}
 , {"path": "/home", "type": "directory"}
-, {"path": "/google", "type": "file", "href": "http://www.google.com"}
 , {"path": "/blog/post1", "type": "file", "content": "This is my first post"}
 , {"path": "/blog/post2", "type": "file", "content": "This is my second post"}
 , {"path": "/blog/post3", "type": "file", "content": "This is my third post"}
@@ -29,6 +28,7 @@ $files_json = <<<JSON
 , {"path": "/contacts", "type": "file", "content": "Contact me at spam@montypython.com"}
 , {"path": "/irc", "type": "file", "content": "IRC channel at #thegame@irc.randomstuff.com"}
 , {"path": "/root", "type": "directory", "can_write": "root", "can_read": "root"}
+, {"path": "/google", "type": "file", "owner": "root", "can_read": "@all", "can_write": "root", "href": "http://www.google.com"}
 ]
 
 JSON;

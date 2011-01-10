@@ -381,6 +381,19 @@ switch ( $action )
 
 		break;
 
+	case 'link':
+		$resource = $_REQUEST['resource'];
+		$link = $_REQUEST['link'];
+		$type = $_REQUEST['type'];
+
+		if ( !( $resource && $link && $type ))
+		{
+			return false;
+		}
+
+		print __link ( $resource, $link, $type );
+		break;
+
 	default :
 		print "Unallowed action\n";
 		break;
