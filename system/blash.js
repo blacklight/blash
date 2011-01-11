@@ -400,11 +400,7 @@ function blash ()
 
 			var outDiv = document.createElement ( 'span' );
 			outDiv.innerHTML = text;
-			//outDiv.innerHTML = ((value.length > 0) ? value : '') +
-			//	( value.match ( /<br\/?>\s*$/ ) ? '' : '<br/>' ) + ((out.length > 0) ? (out + '<br/>') : '') + text + (( shell.__first_cmd ) ? '<br/>' : '' );
-			//outDiv.innerHTML = outDiv.innerHTML.replace ( /<br\/?>\s*$/, '' );
 			this.window.insertBefore ( outDiv, document.getElementsByName ( "blashPrompt" )[0] );
-			// this.window.appendChild ( outDiv );
 
 			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
@@ -941,6 +937,51 @@ function blash ()
 		}
 
 		return false;
+	}
+
+	/**
+	 * \brief Refresh the file list for the current user
+	 */
+	this.refreshFiles = function ()
+	{
+		var files_config = window.location.href;
+		files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
+
+		var http = new XMLHttpRequest();
+		http.open ( "GET", files_config, true );
+
+		http.onreadystatechange = function ()
+		{
+			if ( http.readyState == 4 && http.status == 200 )
+			{
+				shell.files = eval ( '(' + http.responseText + ')' );
+
+				// Remove duplicates
+				var tmp = new Array();
+
+				for ( var i in shell.files )
+				{
+					var contains = false;
+
+					for ( var j=0; j < tmp.length && !contains; j++ )
+					{
+						if ( shell.files[i].path == tmp[j].path )
+						{
+							contains = true;
+						}
+					}
+
+					if ( !contains )
+					{
+						tmp.push ( shell.files[i] );
+					}
+				}
+
+				shell.files = tmp;
+			}
+		}
+
+		http.send ( null );
 	}
 }
 

@@ -394,6 +394,25 @@ switch ( $action )
 		print __link ( $resource, $link, $type );
 		break;
 
+	case 'cp':
+	case 'mv':
+		$src = $_REQUEST['src'];
+		$dest = $_REQUEST['dest'];
+
+		if ( !( $src && $dest ))
+		{
+			return false;
+		}
+
+		print __cp ( $src, $dest );
+
+		if ( $action == 'mv' )
+		{
+			print __rm ( $src );
+		}
+
+		break;
+
 	default :
 		print "Unallowed action\n";
 		break;

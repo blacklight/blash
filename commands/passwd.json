@@ -72,13 +72,7 @@
 				{
 					if ( http.readyState == 4 && http.status == 200 )
 					{
-						if ( http.responseText.length > 0 )
-						{
-							shell.cmdOut.innerHTML = http.responseText;
-						} else {
-							shell.cmdOut.innerHTML = '';
-						}
-
+						shell.cmdOut.innerHTML = http.responseText;
 						shell.refreshPrompt ( false, false );
 					}
 				}

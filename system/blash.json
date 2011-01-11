@@ -55,6 +55,7 @@
 	"commands" : [
 		"cat",
 		"cd",
+		"cp",
 		"chmod",
 		"clear",
 		"echo",
@@ -66,6 +67,7 @@
 		"ls",
 		"man",
 		"mkdir",
+		"mv",
 		"nano",
 		"passwd",
 		"pwd",

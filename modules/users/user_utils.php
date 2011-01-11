@@ -318,6 +318,111 @@ function __link ( $resource, $link, $type )
 	return "Unable to link the resource";
 }
 
+function __cp ( $src, $dest )
+{
+	include "../../system/files_json.php";
+
+	if ( !$files_json || strlen ( $files_json ) == 0 )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	$json = json_decode ( $files_json, true );
+
+	if ( !$json )
+	{
+		return 'Error: Empty JSON file container';
+	}
+
+	$src_index  = -1;
+	$dest_index = -1;
+
+	for ( $i=0; $i < count ( $json ) && ( $src_index == -1 || $dest_index == -1 ); $i++ )
+	{
+		if ( $json[$i]['path'] == $src )
+		{
+			$src_index = $i;
+		}
+
+		if ( $json[$i]['path'] == $dest )
+		{
+			$dest_index = $i;
+		}
+	}
+
+	if ( $src_index == -1 )
+	{
+		$src = str_replace ( '<', '&lt;', $src );
+		$src = str_replace ( '>', '&gt;', $src );
+		return "cp: Cannot stat ".$src.": No such file or directory\n";
+	}
+
+	if ( $dest_index == -1 )
+	{
+		$ret =  __touch ( $dest, null );
+
+		if ( strlen ( $ret ) > 0 )
+		{
+			return $ret;
+		}
+
+		include "../../system/files_json.php";
+
+		if ( !$files_json || strlen ( $files_json ) == 0 )
+		{
+			return 'Error: Empty JSON file container';
+		}
+
+		$json = json_decode ( $files_json, true );
+
+		if ( !$json )
+		{
+			return 'Error: Empty JSON file container';
+		}
+
+		for ( $i=0; $i < count ( $json ) && $dest_index == -1; $i++ )
+		{
+			$out .= $json[$i]['path']. ", ";
+			if ( $json[$i]['path'] == $dest )
+			{
+				$dest_index = $i;
+			}
+		}
+	}
+
+	if ( $dest_index == -1 )
+	{
+		$dest = str_replace ( '<', '&lt;', $dest );
+		$dest = str_replace ( '>', '&gt;', $dest );
+		return "cp: Could not create the file $dest\n";
+	}
+
+	foreach ( array_keys ( $json[$dest_index] ) as $key )
+	{
+		if ( $key != 'path' )
+		{
+			unset ( $json[$dest_index][$key] );
+		}
+	}
+
+	foreach ( array_keys ( $json[$src_index] ) as $key )
+	{
+		if ( $key != 'path' )
+		{
+			$json[$dest_index][$key] = $json[$src_index][$key];
+		}
+	}
+
+	if ( !( $fp = fopen ( "../../system/files_json.php", "w" )))
+	{
+		return "Unable to write on directories file\n";
+	}
+
+	fwrite ( $fp, "<?php\n\n\$files_json = <<<JSON\n".__json_encode ( $json )."\nJSON;\n\n?>");
+	fclose ( $fp );
+	return false;
+}
+
 function __json_encode( $data ) {           
 	if ( is_array ($data) || is_object ($data) ) {
 		$islist = is_array ($data) && ( empty ($data) || array_keys ($data) === range (0,count($data)-1) );

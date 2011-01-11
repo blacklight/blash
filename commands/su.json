@@ -73,45 +73,7 @@
 					{
 						var user = RegExp.$1;
 						shell.user = user;
-
-						var files_config = window.location.href;
-						files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
-
-						var http2 = new XMLHttpRequest();
-						http2.open ( "GET", files_config, true );
-
-						http2.onreadystatechange = function ()
-						{
-							if ( http2.readyState == 4 && http2.status == 200 )
-							{
-								shell.files = eval ( '(' + http2.responseText + ')' );
-
-								// Remove duplicates
-								var tmp = new Array();
-
-								for ( var i in shell.files )
-								{
-									var contains = false;
-
-									for ( var j=0; j < tmp.length && !contains; j++ )
-									{
-										if ( shell.files[i].path == tmp[j].path )
-										{
-											contains = true;
-										}
-									}
-
-									if ( !contains )
-									{
-										tmp.push ( shell.files[i] );
-									}
-								}
-
-								shell.files = tmp;
-							}
-						}
-
-						http2.send ( null );
+						shell.refreshFiles();
 
 						var xml2 = new XMLHttpRequest();
 						xml2.open ( "POST", users_php, true );

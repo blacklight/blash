@@ -24,11 +24,11 @@ $files_json = <<<JSON
 , {"path": "/tutorials/tut1", "type": "file", "href": "/software/tut1.pdf"}
 , {"path": "/tutorials/tut2", "type": "file", "href": "/software/tut2.pdf"}
 , {"path": "/github", "type": "file", "href": "https://github.com/BlackLight/blash"}
-, {"path": "/aboutme", "type": "file", "content": "Luke, I am your father"}
 , {"path": "/contacts", "type": "file", "content": "Contact me at spam@montypython.com"}
 , {"path": "/irc", "type": "file", "content": "IRC channel at #thegame@irc.randomstuff.com"}
 , {"path": "/root", "type": "directory", "can_write": "root", "can_read": "root"}
 , {"path": "/google", "type": "file", "owner": "root", "can_read": "@all", "can_write": "root", "href": "http://www.google.com"}
+, {"path": "/aboutme", "type": "file", "content": "Luke, I am your father"}
 ]
 
 JSON;
