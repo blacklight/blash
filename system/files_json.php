@@ -10,9 +10,6 @@ $files_json = <<<JSON
 , {"path": "/software", "type": "directory"}
 , {"path": "/etc", "type": "directory"}
 , {"path": "/home", "type": "directory"}
-, {"path": "/blog/post1", "type": "file", "content": "This is my first post"}
-, {"path": "/blog/post2", "type": "file", "content": "This is my second post"}
-, {"path": "/blog/post3", "type": "file", "content": "This is my third post"}
 , {"path": "/etc/blashrc", "type": "file", "content": "This is the default blash configuration file"}
 , {"path": "/forum/post1", "type": "file", "content": "lol"}
 , {"path": "/forum/post2", "type": "file", "content": "lol"}

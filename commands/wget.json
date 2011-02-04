@@ -1,0 +1,58 @@
+{
+	"name" : "wget",
+
+	"info" : {
+		"syntax" : "wget &lt;file&gt;",
+		"brief" : "Creates a static textual version of the selected file, suitable for download",
+	},
+
+	"action" : function ( arg )
+	{
+		var out = '';
+		var found = false;
+		var dir = shell.files;
+
+		if ( !arg || arg.length == 0 )
+		{
+			return "Argument required<br/>\n";
+		}
+
+		arg = shell.expandPath ( arg );
+
+		for ( var i=0; i < dir.length && !found; i++ )
+		{
+			if ( dir[i].path == arg )
+			{
+				found = true;
+
+				if ( dir[i].type == 'directory' )
+				{
+					return "wget: " + dir[i].path + ": Is a directory<br/>\n";
+				} else {
+					if ( dir[i].content ) {
+						var wgetWin = window.open("_blank","");
+						if(wgetWin)
+						{
+							wgetWin.document.write(dir[i].content);
+							return "<br />";
+						}
+						else
+							return "wget: cannot open new window.<br />";
+
+					}
+				}
+			}
+		}
+
+		if ( !found )
+		{
+			arg = arg.replace ( '<', '&lt;' );
+			arg = arg.replace ( '>', '&gt;' );
+			return "wget: " + arg + ": No such file or directory<br/>\n";
+		}
+
+		out = out.replace ( /<br\/?>\s*$/, '' );
+		return out;
+	}
+}
+ 

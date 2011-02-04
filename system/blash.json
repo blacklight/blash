@@ -78,6 +78,7 @@
 		"useradd",
 		"userdel",
 		"users",
+		"wget",
 		"whoami"
 	]
 }

@@ -850,6 +850,25 @@ function blash ()
 			}
 		}
 
+		if ( arg.match ( /\*/ ))
+		{
+			args = shell.expandStar ( arg );
+
+			if ( args.length == 1 )
+			{
+				return args[0].path;
+			} else {
+				var out = '';
+
+				for ( var i in args )
+				{
+					out += args[i].path + ' ';
+				}
+
+				return out;
+			}
+		}
+
 		return arg;
 	}
 
