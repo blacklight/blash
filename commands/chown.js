@@ -14,3 +14,6 @@
 		{
 			return "Usage: " + this.info.syntax + "<br/>\n";
 		}
+	}
+}
+
