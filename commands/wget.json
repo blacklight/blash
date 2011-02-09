@@ -33,7 +33,7 @@
 						var wgetWin = window.open("_blank","");
 						if(wgetWin)
 						{
-							wgetWin.document.write(dir[i].content);
+							wgetWin.document.write("<pre>"+dir[i].content+"</pre>");
 							return "<br />";
 						}
 						else
@@ -56,3 +56,4 @@
 	}
 }
  
+
