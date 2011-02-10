@@ -423,7 +423,7 @@
 		shell.file_changed = false;
 	},
 
-	"editorpaste" : function ( )
+	"editorpaste" : function ()
 	{
 		if(shell.perms)
 		{
@@ -442,6 +442,13 @@
 					shell.editor_status.innerHTML += ' [read-only] [modified]';
 				}
 		}
+
+		if (shell.firstKey==-1)
+		{
+			shell.hitCount++;
+			shell.firstKey=0;
+		}
+
 		return;
 	},
 
