@@ -1,15 +1,15 @@
 {
-	"name" : "ln",
+	"name" : "mv",
 
-	"info" : {
-		"syntax" : "ln &lt;path or URL&gt; &lt;link name&gt;",
-		"brief" : "Link a specified path inside the system or a URL to a new link file",
+	"info" :  {
+		"syntax" : "mv &lt;source file&gt; &lt;destination file&gt;",
+		"brief" : "Move a file to another",
 	},
 
 	"action" : function ( arg )
 	{
-		var res = null;
-		var link = null;
+		var src = null;
+		var dest = null;
 
 		if ( !arg || arg.length == 0 )
 		{
@@ -18,57 +18,47 @@
 
 		if ( arg.match ( /^\s*('|")([^'|"]+)('|")/ ))
 		{
-			res = RegExp.$2;
+			src = RegExp.$2;
 			arg = arg.replace ( new RegExp ( '^\s*' + RegExp.$1 + RegExp.$2 + RegExp.$3 + '\s*' ), '' );
 		} else if ( arg.match ( /^\s*([^\s]+)/ )) {
-			res = RegExp.$1;
+			src = RegExp.$1;
 			arg = arg.replace ( new RegExp ( '^\s*' + RegExp.$1 + '\s*' ), '' );
 		} else {
 			return "Usage: " + this.info.syntax + "<br/>\n";
 		}
 
-		if ( !res || arg.length == 0 )
+		if ( !src || arg.length == 0 )
 		{
 			return "Usage: " + this.info.syntax + "<br/>\n";
 		}
 
 		if ( arg.match ( /^\s*('|")([^'|"]+)('|")/ ))
 		{
-			link = RegExp.$2;
+			dest = RegExp.$2;
 		} else {
 			arg.match ( /^\s*(.*)$/ );
-			link = RegExp.$1;
+			dest = RegExp.$1;
 		}
 
-		var link_type = null;
+		src = shell.expandPath ( src );
+		dest = shell.expandPath ( dest );
 
-		if ( res.match ( /^[a-z0-9]+:\/\// ))
-		{
-			link_type = 'href';
-		} else {
-			link_type = 'local';
-		}
-
-		var users_php = window.location.href;
-		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
 		shell.auto_prompt_refresh = false;
-		link = shell.expandPath ( link );
-		params = 'action=link&resource=' + escape ( res ) + '&link=' + escape ( link ) + '&type=' + escape ( link_type );
-		
+
+		var users_php = './modules/users/users.php';
+		params = 'action=mv&src=' + escape ( src ) + '&dest=' + escape ( dest );
+
 		var http = new XMLHttpRequest();
 		http.open ( "POST", users_php, true );
-		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-		http.setRequestHeader( "Content-length", params.length );
-		http.setRequestHeader( "Connection", "close" );
-
+		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		http.onreadystatechange = function ()
 		{
 			if ( http.readyState == 4 && http.status == 200 )
 			{
 				shell.cmdOut.innerHTML = http.responseText;
 				shell.refreshFiles();
-				shell.auto_prompt_refresh = true;
 				shell.refreshPrompt ( false, false );
+				shell.auto_prompt_refresh = true;
 			}
 		}
 

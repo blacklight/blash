@@ -24,15 +24,12 @@
 		shell.user = shell.json.user;
 		document.cookie = '';
 
-		var users_php = window.location.href;
-		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		var users_php = './modules/users/users.php';
 		params = 'action=logout';
 
 		var http = new XMLHttpRequest();
 		http.open ( "POST", users_php, true );
 		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-		http.setRequestHeader( "Content-length", params.length );
-		http.setRequestHeader( "Connection", "close" );
 
 		http.onreadystatechange = function ()
 		{
@@ -45,9 +42,7 @@
 		http.send ( params );
 		shell.path = shell.json.basepath;
 
-		var json_config = window.location.href;
-		json_config = json_config.replace ( /\/([a-zA-Z_\.]+)$/, '/system/blash.json' );
-
+		var json_config = './system/config.js';
 		var http2 = new XMLHttpRequest();
 		http2.open ( "GET", json_config, true );
 

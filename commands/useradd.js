@@ -31,7 +31,6 @@
 		var key = ( evt.charCode ) ? evt.charCode : evt.keyCode;
 		var password = document.getElementsByName ( "password" )[0];
 		var repeatPassword = document.getElementsByName ( "repeatPassword" )[0];
-		var repeatPasswordText = document.getElementById ( "repeatPasswordText" );
 
 		if ( key == 13 && password.value.length > 0 )
 		{
@@ -45,16 +44,12 @@
 					return false;
 				}
 
-				var users_php = window.location.href;
-				users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+        var users_php = './modules/users/users.php';
 				params = 'action=add&user=' + escape ( shell.newuser ) + '&pass=' + md5 ( password.value );
 
 				var http = new XMLHttpRequest();
 				http.open ( "POST", users_php, true );
 				http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				http.setRequestHeader("Content-length", params.length);
-				http.setRequestHeader("Connection", "close");
-
 				http.onreadystatechange = function ()
 				{
 					if ( http.readyState == 4 && http.status == 200 )

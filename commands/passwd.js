@@ -53,8 +53,7 @@
 			{
 				shell.cmdOut.innerHTML = 'The passwords do not match';
 			} else {
-				var users_php = window.location.href;
-				users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+        var users_php = './modules/users/users.php';
 				params = 'action=changepwd&user=' + escape ( shell.newuser ) + '&newpass=' + md5 ( password.value );
 
 				if ( shell.curUser != 'root' )
@@ -65,9 +64,6 @@
 				var http = new XMLHttpRequest();
 				http.open ( "POST", users_php, true );
 				http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				http.setRequestHeader("Content-length", params.length);
-				http.setRequestHeader("Connection", "close");
-
 				http.onreadystatechange = function ()
 				{
 					if ( http.readyState == 4 && http.status == 200 )
@@ -111,9 +107,6 @@
 		var http = new XMLHttpRequest();
 		http.open ( "POST", users_php, true );
 		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-		http.setRequestHeader( "Content-length", params.length );
-		http.setRequestHeader( "Connection", "close" );
-
 		http.onreadystatechange = function ()
 		{
 			if ( http.readyState == 4 && http.status == 200 )

@@ -1,9 +1,9 @@
 {
-	"name" : "rm",
+	"name" : "rmdir",
 
 	"info" :  {
-		"syntax" : "rm &lt;file name&gt;",
-		"brief" : "Remove the specified file",
+		"syntax" : "rmdir &lt;directory name&gt;",
+		"brief" : "Remove a directory (recursively if the directory is not empty)",
 	},
 
 	"action" : function ( arg )
@@ -17,15 +17,12 @@
 		shell.auto_prompt_refresh = false;
 		arg = shell.expandPath ( arg );
 
-		var users_php = window.location.href;
-		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
-		params = 'action=rm&file=' + escape ( arg );
+		var users_php = './modules/users/users.php';
+		params = 'action=rmdir&dir=' + escape ( arg );
 
 		var http = new XMLHttpRequest();
 		http.open ( "POST", users_php, true );
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		http.setRequestHeader("Content-length", params.length);
-		http.setRequestHeader("Connection", "close");
 
 		http.onreadystatechange = function ()
 		{

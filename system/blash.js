@@ -2,8 +2,9 @@
  *                                                               *
  * blash - An AJAX CMS for browsing your web site like a shell   *
  *                                                               *
- * by BlackLight <blacklight@autistici.org>, (C) 2010            *
- * Web: http://0x00.ath.cx                                       *
+ * by Fabio "BlackLight" Manganiello <info@fabiomanganiello.com> *
+ * (C) 2010, 2022                                                *
+ * Web: https://blash.fabiomanganiello.com                       *
  * Released under GPL licence v.3                                *
  *                                                               *
  *****************************************************************/
@@ -50,7 +51,36 @@ function blash ()
 	this.promptText = document.getElementById ( "promptText" );
 
 	/** Input field used as prompt */
-	this.prompt = document.getElementsByName ( "blashPrompt" )[0];
+	this.prompt = document.body.querySelector ( "[name=blashPrompt]" );
+  this.getPrompt = function () {
+    let prompt = document.body.querySelector ( "[name=blashPrompt]" );
+    if (!prompt) {
+        prompt = document.createElement ( 'input' );
+        prompt.setAttribute ( 'name', 'blashPrompt' );
+        prompt.setAttribute ( 'type', 'text' );
+        prompt.setAttribute ( 'class', 'promptInput' );
+        prompt.setAttribute ( 'autocomplete', 'off' );
+        prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
+        prompt.setAttribute ( 'onkeyup', 'this.focus()' );
+        prompt.setAttribute ( 'onblur', 'return false' );
+
+        this.cmdOut = document.createElement ( 'div' );
+        this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
+        this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
+        this.cmdOut.innerHTML = '<br/>';
+
+        this.window.appendChild ( prompt );
+        this.window.appendChild ( this.cmdOut );
+        this.prompt = prompt
+
+        if ( this.auto_prompt_focus )
+        {
+          prompt.focus();
+        }
+    }
+
+    return prompt;
+  };
 
 	/** Counter of the open <span> tags when replacing the colours in the command prompt */
 	this.__open_spans = 0;
@@ -73,9 +103,7 @@ function blash ()
 
 	this.loadCommand = function ( cmd )
 	{
-		var cmd_file = window.location.href;
-		cmd_file = cmd_file.replace ( /\/([a-zA-Z_\.]+)$/, '/commands/' + cmd  + ".json" );
-
+    var cmd_file = './commands/' + cmd + '.js'
 		var http = new XMLHttpRequest();
 		http.open ( "GET", cmd_file, true );
 
@@ -96,15 +124,11 @@ function blash ()
 		{
 			this.user = RegExp.$1;
 			var params = 'action=getuser';
-			var users_php = window.location.href;
-			users_php = users_php.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/users.php' );
+			var users_php = './modules/users/users.php';
 
 			var xml = new XMLHttpRequest();
 			xml.open ( "POST", users_php, true );
 			xml.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
-			xml.setRequestHeader ( "Content-length", params.length );
-			xml.setRequestHeader ( "Connection", "close" );
-
 			xml.onreadystatechange = function ()
 			{
 				if ( xml.readyState == 4 && xml.status == 200 )
@@ -123,8 +147,6 @@ function blash ()
 			var xml2 = new XMLHttpRequest();
 			xml2.open ( "POST", users_php, true );
 			xml2.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
-			xml2.setRequestHeader ( "Content-length", params.length );
-			xml2.setRequestHeader ( "Connection", "close" );
 			params = 'action=gethome';
 
 			xml2.onreadystatechange = function ()
@@ -147,11 +169,9 @@ function blash ()
 
 	this.prompt.focus();
 
-	var json_config = window.location.href;
-	json_config = json_config.replace ( /\/([a-zA-Z_\.]+)$/, '/system/blash.json' );
-
+  var config_url = './system/config.js';
 	var http = new XMLHttpRequest();
-	http.open ( "GET", json_config, true );
+	http.open ( "GET", config_url, true );
 
 	http.onreadystatechange = function ()
 	{
@@ -193,15 +213,7 @@ function blash ()
 				}
 			}
 
-			shell.files_json = window.location.href;
-
-			if ( shell.has_users )
-			{
-				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/files.php' );
-			} else {
-				shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/system/files.json' );
-			}
-
+      shell.files_json = shell.has_users ? './modules/users/files.php' : './system/files.json';
 			var http2 = new XMLHttpRequest();
 			http2.open ( "GET", shell.files_json, true );
 
@@ -363,27 +375,7 @@ function blash ()
 							this.window.innerHTML += value + '<br/>' + out + text;
 						}
 
-						this.prompt = document.createElement ( 'input' );
-						this.prompt.setAttribute ( 'name', 'blashPrompt' );
-						this.prompt.setAttribute ( 'type', 'text' );
-						this.prompt.setAttribute ( 'class', 'promptInput' );
-						this.prompt.setAttribute ( 'autocomplete', 'off' );
-						this.prompt.setAttribute ( 'onkeydown', 'shell.getKey ( event )' );
-						this.prompt.setAttribute ( 'onkeyup', 'this.focus()' );
-						this.prompt.setAttribute ( 'onblur', 'return false' );
-
-						this.cmdOut = document.createElement ( 'div' );
-						this.cmdOut.setAttribute ( 'id', 'blashCmdOut' );
-						this.cmdOut.setAttribute ( 'class', 'blashCmdOut' );
-						this.cmdOut.innerHTML = '<br/>';
-
-						this.window.appendChild ( this.prompt );
-						this.window.appendChild ( this.cmdOut );
-
-						if ( this.auto_prompt_focus )
-						{
-							this.prompt.focus();
-						}
+            this.prompt = this.getPrompt();
 					}
 				}
 			}
@@ -400,7 +392,7 @@ function blash ()
 
 			var outDiv = document.createElement ( 'span' );
 			outDiv.innerHTML = text;
-			this.window.insertBefore ( outDiv, document.getElementsByName ( "blashPrompt" )[0] );
+			this.window.insertBefore ( outDiv, this.getPrompt() );
 
 			return false;
 		} else if ( key == 13 || key == 10 || ( key == 67 && evt.ctrlKey )) {
@@ -735,14 +727,15 @@ function blash ()
 
 		if (( this.prompt = document.getElementById ( "promptText" )))
 		{
-			value = this.prompt.innerHTML + (( document.getElementsByName ( 'blashPrompt' )[0].value.length > 0 ) ?
-				' ' + document.getElementsByName ( 'blashPrompt' )[0].value : '' );
-			this.prompt.parentNode.removeChild ( document.getElementsByName ( 'blashPrompt' )[0] );
+      const prompt = this.getPrompt();
+			value = prompt.innerHTML + (( prompt.value.length > 0 ) ?
+				' ' + prompt.value : '' );
+			this.prompt.parentNode.removeChild ( prompt );
 		}
 
-		if ( document.getElementsByName ( 'blashPrompt' )[0] )
+		if ( this.getPrompt() )
 		{
-			document.getElementsByName ( 'blashPrompt' )[0].parentNode.removeChild ( document.getElementsByName ( 'blashPrompt' )[0] );
+			this.getPrompt().parentNode.removeChild ( this.getPrompt() );
 		}
 
 		if (( this.cmdOut = document.getElementById ( "blashCmdOut" )))
@@ -963,9 +956,7 @@ function blash ()
 	 */
 	this.refreshFiles = function ()
 	{
-		var files_config = window.location.href;
-		files_config = files_config.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/files.php' );
-
+		var files_config = './modules/users/files.php';
 		var http = new XMLHttpRequest();
 		http.open ( "GET", files_config, true );
 

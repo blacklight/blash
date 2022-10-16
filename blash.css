@@ -4,7 +4,6 @@ body
 	color : #888;
 	font-family : Terminus, courier, monospace, fixed;
 	font-size : 13px;
-	tabindex : -1;
 }
 
 pre
@@ -13,16 +12,7 @@ pre
 	font-size : 13px;
 }
 
-input.promptInput
-{
-	background-color : black;
-	border : 0;
-	color : #888;
-	font-family : Terminus, courier, monospace, fixed;
-	font-size : 13px;
-	width : 500px;
-}
-
+input.promptInput,
 input.password
 {
 	background-color : black;
@@ -31,6 +21,7 @@ input.password
 	font-family : Terminus, courier, monospace, fixed;
 	font-size : 13px;
 	width : 500px;
+  outline: none;
 }
 
 div#blashWindow
@@ -41,7 +32,6 @@ div#blashWindow
 	/* padding : 10px; */
 	/* border : 1px solid #888; */
 	overflow : auto;
-	tabindex : -1;
 }
 
 span.directory
@@ -57,13 +47,11 @@ span.link
 a
 {
 	color : green;
-	tabindex : -1;
 }
 
 a:visited
 {
 	color : green;
-	tabindex : -1;
 }
 
 span.syntax

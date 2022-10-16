@@ -4,13 +4,14 @@
 
 {
 	"banner" : "blash version 0.1<br/>" +
-		"Copyright (C) 2010 BlackLight &lt;blacklight@autistici.org&gt;" +
+    "by Fabio \"BlackLight\" Manganiello &lt;info@fabiomanganiello.com&gt;>" +
+		"<br/>Copyright (C) 2010, 2022" +
 		"<br/>Licence GPLv3+: GNU GPL version 3 or later " +
 		"&lt;<a class=\"bannerLink\" href=\"http://gnu.org/licences/gpl.html\" target=\"_new\">" +
 		"http://gnu.org/licences/gpl.html</a>&gt;<br/>" +
 		"Source code available at <a class=\"bannerLink\" target=\"_new\" " +
-		"href=\"https://github.com/BlackLight/blash\">" +
-		"https://github.com/BlackLight/blash</a><br/><br/>" +
+		"href=\"https://git.platypush.tech/blacklight/blash\">" +
+		"https://git.platypush.tech/blacklight/blash</a><br/><br/>" +
 		"This is free software; you are free to change and " +
 		"redistribuite it.<br/>There is NO WARRANTY, to the " +
 		"extent permitted by law.<br/>" +

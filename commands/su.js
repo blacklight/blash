@@ -55,15 +55,12 @@
 
 		if ( key == 13 && password.value.length > 0 )
 		{
-			var users_php = window.location.href;
-			users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+			var users_php = './modules/users/users.php';
 			params = 'action=login&user=' + escape ( shell.newuser ) + '&pass=' + md5 ( password.value );
 
 			var http = new XMLHttpRequest();
 			http.open ( "POST", users_php, true );
 			http.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
-			http.setRequestHeader ( "Content-length", params.length );
-			http.setRequestHeader ( "Connection", "close" );
 
 			http.onreadystatechange = function ()
 			{
@@ -78,8 +75,6 @@
 						var xml2 = new XMLHttpRequest();
 						xml2.open ( "POST", users_php, true );
 						xml2.setRequestHeader ( "Content-type", "application/x-www-form-urlencoded" );
-						xml2.setRequestHeader ( "Content-length", params.length );
-						xml2.setRequestHeader ( "Connection", "close" );
 						params = 'action=gethome';
 
 						xml2.onreadystatechange = function ()
@@ -94,14 +89,9 @@
 									shell.user = shell.json.user;
 								}
 
-								shell.files_json = window.location.href;
-
-								if ( shell.has_users )
-								{
-									shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/modules/users/files.php' );
-								} else {
-									shell.files_json = shell.files_json.replace ( /\/([a-zA-Z_\.]+)$/, '/system/files.json' );
-								}
+                shell.files_json = shell.has_users ?
+									 './modules/users/files.php' :
+									 './system/files.json';
 
 								var http3 = new XMLHttpRequest();
 								http3.open ( "GET", shell.files_json, true );

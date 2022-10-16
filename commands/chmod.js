@@ -29,8 +29,7 @@
 		perms |= (( perm_string.match ( 'w' )) ? 1 : 0 );
 		resource = shell.expandPath ( resource );
 
-		var users_php = window.location.href;
-		users_php = users_php.replace ( /\/([a-zA-Z\.]+)$/, '/modules/users/users.php' );
+		var users_php = './modules/users/users.php';
 		params = 'action=chmod&resource=' + escape ( resource ) + '&perms=' + escape ( perms.toString() );
 
 		if ( userlist )
@@ -41,9 +40,6 @@
 		var http = new XMLHttpRequest();
 		http.open ( "POST", users_php, true );
 		http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-		http.setRequestHeader( "Content-length", params.length );
-		http.setRequestHeader( "Connection", "close" );
-
 		http.onreadystatechange = function ()
 		{
 			if ( http.readyState == 4 && http.status == 200 )
